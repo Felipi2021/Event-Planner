@@ -14,21 +14,21 @@ const register = (req, res) => {
     });
   });
 };
+
+
 const login = (req, res) => {
   const { email, password } = req.body;
   const query = 'SELECT * FROM users WHERE email = ?';
   db.query(query, [email], (err, results) => {
-    if (err || results.length === 0){
-        return res.status(404).send({ message: 'User not found!' });
-    }
-    else{
-        const user = results[0];
-        bcrypt.compare(password, user.password, (err, isMatch) => {
+    if (err || results.length === 0) {
+      return res.status(404).send({ message: 'User not found!' });
+    } else {
+      const user = results[0];
+      bcrypt.compare(password, user.password, (err, isMatch) => {
         if (!isMatch) return res.status(401).send({ message: 'Invalid credentials!' });
-            const token = jwt.sign({ id: user.id }, secretKey, { expiresIn: '1h' });
-            res.send({ token });
-            return token;
-        });
+        const token = jwt.sign({ id: user.id }, secretKey, { expiresIn: '1h' });
+        res.send({ token, userId: user.id }); // Include userId in the response
+      });
     }
   });
 };

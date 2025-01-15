@@ -2,15 +2,62 @@ import React, { useState } from 'react';
 
 const EventCard = ({ event, onRegister, onAttend, onRemoveAttend }) => {
   const [isAttending, setIsAttending] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleAttendClick = async () => {
-    await onAttend(event.id); 
-    setIsAttending(true); 
+    try {
+      setLoading(true);
+      const userId = localStorage.getItem('userId'); // Ensure userId is stored in localStorage
+      if (!userId) {
+        alert('User ID not found. Please log in again.');
+        setLoading(false);
+        return;
+      }
+      await onAttend(event.id, userId); 
+      setIsAttending(true); 
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      alert('Failed to mark attendance. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRemoveAttendClick = async () => {
-    await onRemoveAttend(event.id); 
-    setIsAttending(false); 
+    try {
+      setLoading(true);
+      const userId = localStorage.getItem('userId'); // Ensure userId is stored in localStorage
+      if (!userId) {
+        alert('User ID not found. Please log in again.');
+        setLoading(false);
+        return;
+      }
+      await onRemoveAttend(event.id, userId); 
+      setIsAttending(false); 
+    } catch (error) {
+      console.error('Error removing attendance:', error);
+      alert('Failed to remove attendance. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterClick = async () => {
+    try {
+      setLoading(true);
+      const userId = localStorage.getItem('userId'); // Ensure userId is stored in localStorage
+      if (!userId) {
+        alert('User ID not found. Please log in again.');
+        setLoading(false);
+        return;
+      }
+      await onRegister(event.id, userId);
+    } catch (error) {
+      console.error('Error registering for event:', error);
+      alert('Failed to register for the event. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,23 +72,26 @@ const EventCard = ({ event, onRegister, onAttend, onRemoveAttend }) => {
         <button
           style={styles.attendingButton}
           onClick={handleRemoveAttendClick}
+          disabled={loading}
         >
-          Attending (Click to Remove)
+          {loading ? 'Processing...' : 'Attending (Click to Remove)'}
         </button>
       ) : (
         <button
           style={styles.attendButton}
           onClick={handleAttendClick}
+          disabled={loading}
         >
-          Mark as Attending
+          {loading ? 'Processing...' : 'Mark as Attending'}
         </button>
       )}
-      <button style={styles.registerButton} onClick={() => onRegister(event.id)}>
-        Register
+      <button style={styles.registerButton} onClick={handleRegisterClick} disabled={loading}>
+        {loading ? 'Processing...' : 'Register'}
       </button>
     </div>
   );
 };
+
 const styles = {
   card: {
     border: '1px solid #ccc',
@@ -74,7 +124,8 @@ const styles = {
     color: 'white',
     border: 'none',
     borderRadius: '4px',
-    cursor: 'default', 
+    cursor: 'pointer',
+    marginRight: '8px',
   },
   registerButton: {
     padding: '8px 16px',

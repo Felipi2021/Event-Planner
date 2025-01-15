@@ -18,27 +18,27 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  const handleRegister = async (eventId) => {
+  const handleRegister = async (eventId, userId) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('You need to log in to register for an event.');
+        alert('You need to log in to register for the event.');
         return;
       }
-
-      await axios.post(
+  
+      const response = await axios.post(
         `http://localhost:5000/api/events/${eventId}/register`,
-        {},
+        { userId }, // Pass userId in the request body
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Successfully registered for the event!');
+      alert(response.data.message);
     } catch (err) {
       console.error('Error registering for event:', err);
-      alert('Failed to register. Please try again.');
+      alert('Failed to register for the event. Please try again.');
     }
   };
 
-  const handleAttend = async (eventId) => {
+  const handleAttend = async (eventId, userId) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -48,7 +48,7 @@ const Events = () => {
   
       const response = await axios.post(
         `http://localhost:5000/api/events/${eventId}/attend`,
-        {}, // Nie musisz przesyłać `userId`, jest w tokenie
+        { userId }, // Pass userId in the request body
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert(response.data.message);
@@ -58,7 +58,7 @@ const Events = () => {
     }
   };
 
-  const handleRemoveAttend = async (eventId) => {
+  const handleRemoveAttend = async (eventId, userId) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -68,7 +68,10 @@ const Events = () => {
   
       const response = await axios.delete(
         `http://localhost:5000/api/events/${eventId}/attend`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          data: { userId } // Pass userId in the request body
+        }
       );
       alert(response.data.message);
     } catch (err) {

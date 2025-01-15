@@ -12,6 +12,7 @@ const Login = () => {
     try {
       const response = await axios.post('http://localhost:5000/api/users/login', { email, password });
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('userId', response.data.userId); // Store userId in local storage
       alert('Logged in successfully!');
       navigate('/events');
     } catch (err) {
