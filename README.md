@@ -1,4 +1,4 @@
-#Event Planner Application
+Event Planner Application
 Overview
 Event Planner is a web-based application designed to streamline event organization and participation. It allows users to create, manage, and attend events while fostering a community-driven experience through user profile evaluations. The platform includes additional features for user interactions, reputation scoring, and administrative oversight to ensure smooth operations.
 
