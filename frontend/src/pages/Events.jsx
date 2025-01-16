@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import EventCard from '../components/EventCard';
+import '../styles/form.css';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -28,7 +29,7 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  const handleRegister = async (eventId, userId) => {
+  const handleRegister = async (eventId) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -36,19 +37,26 @@ const Events = () => {
         return;
       }
 
+      const userId = localStorage.getItem('userId');
       const response = await axios.post(
         `http://localhost:5000/api/events/${eventId}/register`,
         { userId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert(response.data.message);
+      setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId ? { ...event, attendees_count: event.attendees_count + 1 } : event
+        )
+      );
     } catch (err) {
       console.error('Error registering for event:', err);
       alert('Failed to register for the event. Please try again.');
     }
   };
 
-  const handleAttend = async (eventId, userId) => {
+  const handleAttend = async (eventId) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -56,6 +64,7 @@ const Events = () => {
         return;
       }
 
+      const userId = localStorage.getItem('userId');
       const response = await axios.post(
         `http://localhost:5000/api/events/${eventId}/attend`,
         { userId },
@@ -63,13 +72,18 @@ const Events = () => {
       );
       alert(response.data.message);
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId ? { ...event, attendees_count: event.attendees_count + 1 } : event
+        )
+      );
     } catch (err) {
       console.error('Error marking attendance:', err);
       alert('Failed to mark attendance. Please try again.');
     }
   };
 
-  const handleRemoveAttend = async (eventId, userId) => {
+  const handleRemoveAttend = async (eventId) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -77,6 +91,7 @@ const Events = () => {
         return;
       }
 
+      const userId = localStorage.getItem('userId');
       const response = await axios.delete(
         `http://localhost:5000/api/events/${eventId}/attend`,
         {
@@ -86,6 +101,11 @@ const Events = () => {
       );
       alert(response.data.message);
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId ? { ...event, attendees_count: event.attendees_count - 1 } : event
+        )
+      );
     } catch (err) {
       console.error('Error removing attendance:', err);
       alert('Failed to remove attendance. Please try again.');
@@ -93,7 +113,7 @@ const Events = () => {
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
+    <div className="event-list-container">
       <h2>Available Events</h2>
       {events.map((event) => (
         <EventCard

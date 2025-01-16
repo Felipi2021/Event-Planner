@@ -65,80 +65,80 @@ const EventCard = ({ event, isAttending: initialIsAttending, onRegister, onAtten
   };
 
   return (
-    <div style={styles.card}>
+    <div style={styles.container}>
       <h3 style={styles.title}>{event.title}</h3>
       <p style={styles.description}>{event.description}</p>
-      <p><strong>Date:</strong> {event.date}</p>
-      <p><strong>Location:</strong> {event.location}</p>
-      <p><strong>Capacity:</strong> {event.capacity}</p>
-      <p><strong>Attendees:</strong> {event.attendees_count}</p>
-      {isAttending ? (
-        <button
-          style={styles.attendingButton}
-          onClick={handleRemoveAttendClick}
-          disabled={loading}
-        >
-          {loading ? 'Processing...' : 'Attending (Click to Remove)'}
-        </button>
-      ) : (
-        <button
-          style={styles.attendButton}
-          onClick={handleAttendClick}
-          disabled={loading}
-        >
-          {loading ? 'Processing...' : 'Mark as Attending'}
-        </button>
-      )}
-      <button style={styles.registerButton} onClick={handleRegisterClick} disabled={loading}>
-        {loading ? 'Processing...' : 'Register'}
-      </button>
+      <p style={styles.detail}><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
+      <p style={styles.detail}><strong>Location:</strong> {event.location}</p>
+      <p style={styles.detail}><strong>Capacity:</strong> {event.capacity}</p>
+      <p style={styles.detail}><strong>Attendees:</strong> {event.attendees_count}</p>
+      <div style={styles.buttonGroup}>
+        {isAttending ? (
+          <button style={{ ...styles.button, ...styles.attendingButton }} onClick={() => onRemoveAttend(event.id)}>Remove Attendance</button>
+        ) : (
+          <>
+            <button style={{ ...styles.button, ...styles.attendButton }} onClick={() => onAttend(event.id)}>Attend</button>
+            <button style={{ ...styles.button, ...styles.registerButton }} onClick={() => onRegister(event.id)}>Register</button>
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
 
 const styles = {
-  card: {
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    padding: '16px',
+  container: {
+    maxWidth: '350px',
     width: '700px',
-    marginBottom: '16px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    margin: '0 auto',
+    padding: '2rem',
+    border: '1px solid #171717',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(68, 65, 65, 0.571)',
+    boxShadow: '0 4px 8px rgba(65, 64, 64, 0.1)',
+    marginBottom: '1.5rem',
   },
   title: {
-    fontSize: '1.5rem',
-    marginBottom: '8px',
+    textAlign: 'center',
+    marginBottom: '1.5rem',
+    color: '#8b8484',
   },
   description: {
+    marginBottom: '1.5rem',
+    color: '#8b8484',
+  },
+  detail: {
+    marginBottom: '0.5rem',
+    color: '#8b8484',
+  },
+  buttonGroup: {
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  button: {
+    width: 'auto',
+    padding: '0.75rem',
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
     fontSize: '1rem',
-    marginBottom: '8px',
+    marginRight: '8px',
   },
   attendButton: {
-    padding: '8px 16px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginRight: '8px',
+    backgroundColor: '#007bff',
+    outline: 'none',
   },
   attendingButton: {
-    padding: '8px 16px',
-    backgroundColor: '#646cff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginRight: '8px',
+    backgroundColor: '#0056b3',
+    outline: 'none',
   },
   registerButton: {
-    padding: '8px 16px',
-    backgroundColor: '#ffc107',
+    backgroundColor: 'rgba(241, 161, 11, 0.85)',
     color: 'black',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
+    outline: 'none',
   },
 };
 

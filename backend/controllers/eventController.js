@@ -15,7 +15,7 @@ const getAllEvents = (req, res) => {
     if (err) return res.status(500).send(err);
     const events = results.map(event => ({
       ...event,
-      date: event.date.toISOString().split('T')[0] // Format date to YYYY-MM-DD
+      date: event.date.toISOString().split('T')[0] 
     }));
     res.send(events);
   });
@@ -94,9 +94,3 @@ const removeAttendance = (req, res) => {
 };
 
 module.exports = { createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance };
-
-//working. problem that was in code is now solved, but i want it to hold the attendance option
-//on server after logging out and logging back in to account because database holds this 
-//information but when i relog to account it seems forgetting and i cant click attend because
-//it as already attended but when button changes to remove attendance i can remove it and 
-//cycle works again + give real use to registration button + delete registration button
