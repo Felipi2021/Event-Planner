@@ -13,7 +13,11 @@ const getAllEvents = (req, res) => {
   const query = 'SELECT * FROM events';
   db.query(query, (err, results) => {
     if (err) return res.status(500).send(err);
-    res.send(results);
+    const events = results.map(event => ({
+      ...event,
+      date: event.date.toISOString().split('T')[0] // Format date to YYYY-MM-DD
+    }));
+    res.send(events);
   });
 };
 

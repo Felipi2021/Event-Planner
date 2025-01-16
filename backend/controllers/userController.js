@@ -33,4 +33,17 @@ const login = (req, res) => {
   });
 };
 
-module.exports = { register, login };
+const getAttendanceStatus = (req, res) => {
+  const userId = req.params.userId;
+  const query = 'SELECT event_id FROM registration WHERE user_id = ?';
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).send(err);
+    const attendanceStatus = results.reduce((acc, row) => {
+      acc[row.event_id] = true;
+      return acc;
+    }, {});
+    res.send(attendanceStatus);
+  });
+};
+
+module.exports = { register, login, getAttendanceStatus };

@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const EventCard = ({ event, onRegister, onAttend, onRemoveAttend }) => {
-  const [isAttending, setIsAttending] = useState(false);
+const EventCard = ({ event, isAttending: initialIsAttending, onRegister, onAttend, onRemoveAttend }) => {
+  const [isAttending, setIsAttending] = useState(initialIsAttending);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setIsAttending(initialIsAttending);
+  }, [initialIsAttending]);
 
   const handleAttendClick = async () => {
     try {
       setLoading(true);
-      const userId = localStorage.getItem('userId'); // Ensure userId is stored in localStorage
+      const userId = localStorage.getItem('userId');
       if (!userId) {
         alert('User ID not found. Please log in again.');
         setLoading(false);
         return;
       }
-      await onAttend(event.id, userId); 
-      setIsAttending(true); 
+      await onAttend(event.id, userId);
+      setIsAttending(true);
     } catch (error) {
       console.error('Error marking attendance:', error);
       alert('Failed to mark attendance. Please try again.');
@@ -26,14 +30,14 @@ const EventCard = ({ event, onRegister, onAttend, onRemoveAttend }) => {
   const handleRemoveAttendClick = async () => {
     try {
       setLoading(true);
-      const userId = localStorage.getItem('userId'); // Ensure userId is stored in localStorage
+      const userId = localStorage.getItem('userId');
       if (!userId) {
         alert('User ID not found. Please log in again.');
         setLoading(false);
         return;
       }
-      await onRemoveAttend(event.id, userId); 
-      setIsAttending(false); 
+      await onRemoveAttend(event.id, userId);
+      setIsAttending(false);
     } catch (error) {
       console.error('Error removing attendance:', error);
       alert('Failed to remove attendance. Please try again.');
@@ -45,7 +49,7 @@ const EventCard = ({ event, onRegister, onAttend, onRemoveAttend }) => {
   const handleRegisterClick = async () => {
     try {
       setLoading(true);
-      const userId = localStorage.getItem('userId'); // Ensure userId is stored in localStorage
+      const userId = localStorage.getItem('userId');
       if (!userId) {
         alert('User ID not found. Please log in again.');
         setLoading(false);
@@ -91,6 +95,7 @@ const EventCard = ({ event, onRegister, onAttend, onRemoveAttend }) => {
     </div>
   );
 };
+
 
 const styles = {
   card: {
