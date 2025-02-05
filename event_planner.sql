@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 16, 2025 at 11:22 PM
+-- Generation Time: Feb 05, 2025 at 08:44 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,8 +34,17 @@ CREATE TABLE `events` (
   `date` date NOT NULL,
   `location` varchar(100) NOT NULL,
   `capacity` int(11) NOT NULL,
-  `attendees_count` int(11) DEFAULT 0
+  `attendees_count` int(11) DEFAULT 0,
+  `created_by` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `events`
+--
+
+INSERT INTO `events` (`id`, `title`, `description`, `date`, `location`, `capacity`, `attendees_count`, `created_by`) VALUES
+(10, 'f', 'f', '2025-11-02', 'poznań', 50, 1, NULL),
+(11, 'lebron posiedzenie', 'cos bedzie', '2025-06-02', 'czestochowa', 200, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -73,8 +82,17 @@ CREATE TABLE `users` (
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('user','admin') DEFAULT 'user'
+  `role` enum('user','admin') DEFAULT 'user',
+  `image` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `image`) VALUES
+(18, 'Dzon', 'dzon@dzons.pl', '$2a$10$p7WYOK3Qag.o.M4xhX4a4unR./6OTcT2D/s/AINYnTtgVN7uCTEjq', 'user', '1738783139463-dzon dzons.png'),
+(19, 'a', 'a@a.a', '$2a$10$pjLtuWmda./T3Ms5qe4GieYAiDONGoeiBImDtnEM16z5Ct8lH8AQG', 'user', '1738784061667-dzon dzons.png');
 
 --
 -- Indexes for dumped tables
@@ -115,13 +133,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `registration`
 --
 ALTER TABLE `registration`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
 
 --
 -- AUTO_INCREMENT for table `substitutes`
@@ -133,7 +151,7 @@ ALTER TABLE `substitutes`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Constraints for dumped tables
