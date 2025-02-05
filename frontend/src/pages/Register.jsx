@@ -9,13 +9,16 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [passwordErrors, setPasswordErrors] = useState([]);
   const [passwordValid, setPasswordValid] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
   const [emailValid, setEmailValid] = useState(true);
   const [emailMessage, setEmailMessage] = useState('');
+  const [image, setImage] = useState(null);
   const navigate = useNavigate();
 
   const handlePasswordChange = (e) => {
     const value = e.target.value;
     setPassword(value);
+    setPasswordTouched(true);
 
     const errors = [];
     if (value.length < 8) {
@@ -53,6 +56,10 @@ const Register = () => {
     }
   };
 
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (passwordErrors.length > 0 || !emailValid) {
@@ -60,8 +67,20 @@ const Register = () => {
       return;
     }
 
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('email', email);
+    formData.append('password', password);
+    if (image) {
+      formData.append('image', image);
+    }
+
     try {
-      const response = await axios.post('http://localhost:5000/api/users/register', { username, email, password });
+      const response = await axios.post('http://localhost:5000/api/users/register', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       alert('Registered successfully!');
       navigate('/login');
     } catch (err) {
@@ -96,13 +115,19 @@ const Register = () => {
           className={passwordErrors.length > 0 ? 'invalid' : ''}
           required
         />
-        {passwordErrors.length > 0 ? (
-          passwordErrors.map((error, index) => (
-            <p key={index} className="error-message">{error}</p>
-          ))
-        ) : (
-          <p className="success-message">Password is valid ✓</p>
+        {passwordTouched && (
+          passwordErrors.length > 0 ? (
+            passwordErrors.map((error, index) => (
+              <p key={index} className="error-message">{error}</p>
+            ))
+          ) : (
+            <p className="success-message">Password is valid ✓</p>
+          )
         )}
+      </div>
+      <div className="form__group">
+        <label>Profile Image:</label>
+        <input type="file" onChange={handleImageChange} />
       </div>
       <button type="submit">Register</button>
     </form>
