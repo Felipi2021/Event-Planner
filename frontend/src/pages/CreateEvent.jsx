@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../styles/form.css';
+import '../styles/form.scss';
 
 const CreateEvent = () => {
   const [title, setTitle] = useState('');
@@ -15,7 +15,7 @@ const CreateEvent = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/api/events', { title, description, date, location, capacity });
+      const response = await axios.post('http://localhost:5001/api/events', { title, description, date, location, capacity });
       alert('Event created successfully!');
       navigate('/events');
     } catch (err) {

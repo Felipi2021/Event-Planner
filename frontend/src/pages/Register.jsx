@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../styles/form.css';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../styles/form.scss';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -13,6 +15,7 @@ const Register = () => {
   const [emailValid, setEmailValid] = useState(true);
   const [emailMessage, setEmailMessage] = useState('');
   const [image, setImage] = useState(null);
+  const [serverError, setServerError] = useState('');
   const navigate = useNavigate();
 
   const handlePasswordChange = (e) => {
@@ -63,7 +66,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (passwordErrors.length > 0 || !emailValid) {
-      alert('Please fix the errors before submitting.');
+      toast.error('Please fix the errors before submitting.');
       return;
     }
 
@@ -76,15 +79,21 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/register', formData, {
+      const response = await axios.post('http://localhost:5001/api/users/register', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      alert('Registered successfully!');
+      toast.success('Registered successfully!');
       navigate('/login');
     } catch (err) {
-      alert('Registration failed. Please try again.');
+      if (err.response && err.response.data && err.response.data.message) {
+        setServerError(err.response.data.message);
+        toast.error(err.response.data.message);
+      } else {
+        setServerError('Registration failed. Please try again.');
+        toast.error('Registration failed. Please try again.');
+      }
     }
   };
 
@@ -129,6 +138,7 @@ const Register = () => {
         <label>Profile Image:</label>
         <input type="file" onChange={handleImageChange} />
       </div>
+      {serverError && <p className="error-message">{serverError}</p>}
       <button type="submit">Register</button>
     </form>
   );

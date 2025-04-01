@@ -27,21 +27,43 @@ const register = async (req, res) => {
   const image = req.file ? req.file.filename : null;
 
   try {
-    console.log('Registering user:', { username, email, image });
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const query = 'INSERT INTO users (username, email, password, image) VALUES (?, ?, ?, ?)';
-    db.query(query, [username, email, hashedPassword, image], (err) => {
+    console.log('Starting registration process for:', email);
+
+    const emailCheckQuery = 'SELECT id FROM users WHERE email = ?';
+    db.query(emailCheckQuery, [email], async (err, results) => {
       if (err) {
-        console.error('Database error:', err);
+        console.error('Database error during email check:', err);
         return res.status(500).send({ message: 'Database error', error: err });
       }
-      res.status(201).send({ message: 'User registered successfully!' });
+
+      if (results.length > 0) {
+        console.log('Email already exists:', email); 
+        return res.status(400).send({ message: 'Email is already in use.' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const query = 'INSERT INTO users (username, email, password, image) VALUES (?, ?, ?, ?)';
+      db.query(query, [username, email, hashedPassword, image], (err) => {
+        if (err) {
+          if (err.code === 'ER_DUP_ENTRY') {
+            console.log('Duplicate email error:', email); 
+            return res.status(400).send({ message: 'Email is already in use.' });
+          }
+
+          console.error('Database error during user insertion:', err);
+          return res.status(500).send({ message: 'Database error', error: err });
+        }
+
+        console.log('User registered successfully:', email);
+        res.status(201).send({ message: 'User registered successfully!' });
+      });
     });
   } catch (err) {
-    console.error('Error during registration:', err);
+    console.error('Unexpected error during registration:', err);
     res.status(500).send({ message: 'Internal server error', error: err });
   }
 };
+
 
 const login = (req, res) => {
   const { email, password } = req.body;
@@ -53,8 +75,7 @@ const login = (req, res) => {
       const user = results[0];
       bcrypt.compare(password, user.password, (err, isMatch) => {
         if (!isMatch) return res.status(401).send({ message: 'Invalid credentials!' });
-        const token = jwt.sign({ id: user.id }, secretKey, { expiresIn: '1h' });
-        res.send({ token, userId: user.id }); 
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' }); 
       });
     }
   });
@@ -67,6 +88,7 @@ const getUserDetails = (req, res) => {
     if (err || results.length === 0) {
       return res.status(404).send({ message: 'User not found!' });
     }
+    console.log('User Details:', results[0]); 
     res.send(results[0]);
   });
 };

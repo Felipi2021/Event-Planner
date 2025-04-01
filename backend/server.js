@@ -8,7 +8,7 @@ const userRoutes = require('./routes/userRoutes.js');
 const eventRoutes = require('./routes/eventRoutes.js');
 
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -20,3 +20,4 @@ app.use('/api/events', eventRoutes);
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
+  

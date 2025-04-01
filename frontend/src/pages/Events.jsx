@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import EventCard from '../components/EventCard';
-import '../styles/form.css';
+import '../styles/global.scss';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -10,76 +12,63 @@ const Events = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/events');
+        const response = await axios.get('http://localhost:5001/api/events');
         setEvents(response.data);
-
+  
         const token = localStorage.getItem('token');
         if (token) {
           const userId = localStorage.getItem('userId');
-          const attendanceResponse = await axios.get(`http://localhost:5000/api/users/${userId}/attendance`, {
+          const attendanceResponse = await axios.get(`http://localhost:5001/api/users/${userId}/attendance`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setAttendanceStatus(attendanceResponse.data);
+        } else {
+          setAttendanceStatus({}); 
         }
       } catch (err) {
         console.error('Error fetching events:', err);
+        toast.error('Failed to fetch events. Please try again.');
       }
     };
-
+  
     fetchEvents();
   }, []);
-
-  const handleRegister = async (eventId) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('You need to log in to register for the event.');
-        return;
-      }
-
-      const userId = localStorage.getItem('userId');
-      const response = await axios.post(
-        `http://localhost:5000/api/events/${eventId}/register`,
-        { userId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert(response.data.message);
-      setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === eventId ? { ...event, attendees_count: event.attendees_count + 1 } : event
-        )
-      );
-    } catch (err) {
-      console.error('Error registering for event:', err);
-      alert('Failed to register for the event. Please try again.');
-    }
-  };
 
   const handleAttend = async (eventId) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('You need to log in to mark attendance.');
+        toast.error('You need to log in to mark attendance.');
         return;
       }
-
+  
       const userId = localStorage.getItem('userId');
+      if (!userId) {
+        toast.error('User ID is missing. Please log in again.');
+        return;
+      }
+  
+      console.log('Sending request with:', { userId, eventId });
+  
       const response = await axios.post(
-        `http://localhost:5000/api/events/${eventId}/attend`,
-        { userId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        `http://localhost:5001/api/events/${eventId}/attend`,
+        { userId }, 
+        { headers: { Authorization: `Bearer ${token}` } } 
       );
-      alert(response.data.message);
-      setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === eventId ? { ...event, attendees_count: event.attendees_count + 1 } : event
-        )
-      );
+  
+      toast.success(response.data.message);
+  
+      const updatedEvents = await axios.get('http://localhost:5001/api/events');
+      setEvents(updatedEvents.data);
     } catch (err) {
       console.error('Error marking attendance:', err);
-      alert('Failed to mark attendance. Please try again.');
+      if (err.response && err.response.status === 400) {
+        toast.error(err.response.data.message || 'Bad Request. Please try again.');
+      } else if (err.response && err.response.status === 401) {
+        toast.error('Unauthorized! Please log in again.');
+      } else {
+        toast.error('Failed to mark attendance. Please try again.');
+      }
     }
   };
 
@@ -87,28 +76,34 @@ const Events = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('You need to log in to remove attendance.');
+        toast.error('You need to log in to remove attendance.');
         return;
       }
-
+  
       const userId = localStorage.getItem('userId');
       const response = await axios.delete(
-        `http://localhost:5000/api/events/${eventId}/attend`,
+        `http://localhost:5001/api/events/${eventId}/attend`,
         {
           headers: { Authorization: `Bearer ${token}` },
           data: { userId },
         }
       );
-      alert(response.data.message);
+      toast.success(response.data.message);
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
       setEvents((prevEvents) =>
         prevEvents.map((event) =>
-          event.id === eventId ? { ...event, attendees_count: event.attendees_count - 1 } : event
+          event.id === eventId
+            ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) } 
+            : event
         )
       );
     } catch (err) {
       console.error('Error removing attendance:', err);
-      alert('Failed to remove attendance. Please try again.');
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error('Failed to remove attendance. Please try again.');
+      }
     }
   };
 
@@ -120,7 +115,6 @@ const Events = () => {
           key={event.id}
           event={event}
           isAttending={attendanceStatus[event.id]}
-          onRegister={handleRegister}
           onAttend={handleAttend}
           onRemoveAttend={handleRemoveAttend}
         />

@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Feb 05, 2025 at 08:44 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost
+-- Generation Time: Apr 01, 2025 at 07:32 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -43,8 +43,7 @@ CREATE TABLE `events` (
 --
 
 INSERT INTO `events` (`id`, `title`, `description`, `date`, `location`, `capacity`, `attendees_count`, `created_by`) VALUES
-(10, 'f', 'f', '2025-11-02', 'poznań', 50, 1, NULL),
-(11, 'lebron posiedzenie', 'cos bedzie', '2025-06-02', 'czestochowa', 200, 0, NULL);
+(20, 'abc', 'def', '2026-02-12', 'faf', 12, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -58,18 +57,12 @@ CREATE TABLE `registration` (
   `event_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `substitutes`
+-- Dumping data for table `registration`
 --
 
-CREATE TABLE `substitutes` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `event_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `registration` (`id`, `user_id`, `event_id`) VALUES
+(192, 45, 20);
 
 -- --------------------------------------------------------
 
@@ -91,8 +84,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `image`) VALUES
-(18, 'Dzon', 'dzon@dzons.pl', '$2a$10$p7WYOK3Qag.o.M4xhX4a4unR./6OTcT2D/s/AINYnTtgVN7uCTEjq', 'user', '1738783139463-dzon dzons.png'),
-(19, 'a', 'a@a.a', '$2a$10$pjLtuWmda./T3Ms5qe4GieYAiDONGoeiBImDtnEM16z5Ct8lH8AQG', 'user', '1738784061667-dzon dzons.png');
+(44, 'a', 'a@a.a', '$2a$10$BpN/MZDR4/LnmxME3k9dLueLjZ7.w0dUDn/AKCrFk1jKI2kTg9rvu', 'user', '1743527151266-pomaranca.png'),
+(45, 'filip', 'filip@gmail.com', '$2a$10$p1l1kD6UYVZwbv/1ZB3E2eTMXYhKBi.c2r3E6ijJK3S9klL2JQJuO', 'user', '1743528332110-pomaranca.png');
 
 --
 -- Indexes for dumped tables
@@ -113,12 +106,6 @@ ALTER TABLE `registration`
   ADD KEY `event_id` (`event_id`);
 
 --
--- Indexes for table `substitutes`
---
-ALTER TABLE `substitutes`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -133,25 +120,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `registration`
 --
 ALTER TABLE `registration`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
-
---
--- AUTO_INCREMENT for table `substitutes`
---
-ALTER TABLE `substitutes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=193;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- Constraints for dumped tables

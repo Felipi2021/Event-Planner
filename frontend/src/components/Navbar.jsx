@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import '../styles/navbar.css';
+import { toast } from 'react-toastify';
 
 const Navbar = ({ isLoggedIn, profileImage }) => {
   const navigate = useNavigate();
@@ -8,17 +8,17 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
-    alert('You have been logged out.');
+    toast.success('You have been logged out.');
     navigate('/login');
-    window.location.reload();
+    window.location.reload(); 
   };
 
   return (
     <nav className="navbar">
       <ul>
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/events">Events</Link></li>
-        <li><Link to="/CreateEvent">Create Event</Link></li>
+        <li><button><Link to="/">Home</Link></button></li>
+        <li><button><Link to="/events">Events</Link></button></li>
+        <li><button><Link to="/CreateEvent">Create Event</Link></button></li>
         {isLoggedIn ? (
           <>
             <li>
@@ -26,14 +26,14 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
             </li>
             {profileImage && (
               <li className="profile-image-container">
-                <img src={`http://localhost:5000/uploads/${profileImage}`} alt="Profile" className="profile-image" />
+                <img src={`http://localhost:5001/uploads/${profileImage}`} alt="Profile" className="profile-image" />                
               </li>
             )}
           </>
         ) : (
           <>
-            <li><Link to="/login">Login</Link></li>
-            <li><Link to="/register">Register</Link></li>
+            <li><button><Link to="/login">Login</Link></button></li>
+            <li><button><Link to="/register">Register</Link></button></li>
           </>
         )}
       </ul>
