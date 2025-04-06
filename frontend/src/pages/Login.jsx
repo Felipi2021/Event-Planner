@@ -32,15 +32,17 @@ const Login = ({ onLogin }) => {
       toast.error('Please fix the errors before submitting.');
       return;
     }
-  
     try {
+      console.log('Sending login request for email:', email);
       const response = await axios.post('http://localhost:5001/api/users/login', { email, password });
+      console.log('Login response:', response.data);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userId', response.data.userId);
       toast.success('Logged in successfully!');
-      onLogin(); 
+      onLogin();
       navigate('/events');
     } catch (err) {
+      console.error('Login error:', err);
       toast.error('Login failed. Check your credentials.');
     }
   };
