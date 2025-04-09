@@ -152,6 +152,44 @@ const removeAttendance = (req, res) => {
     });
   });
 };
+const markFavorite = (req, res) => {
+  const { userId } = req.body;
+  const eventId = req.params.id;
 
-module.exports = { createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance };
+  if (!userId || !eventId) {
+    return res.status(400).send({ message: 'User ID and Event ID are required.' });
+  }
+
+  const checkQuery = 'SELECT * FROM favorites WHERE user_id = ? AND event_id = ?';
+  db.query(checkQuery, [userId, eventId], (err, results) => {
+    if (err) {
+      console.error('Error checking favorite:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+
+    if (results.length > 0) {
+
+      const deleteQuery = 'DELETE FROM favorites WHERE user_id = ? AND event_id = ?';
+      db.query(deleteQuery, [userId, eventId], (err) => {
+        if (err) {
+          console.error('Error removing favorite:', err);
+          return res.status(500).send({ message: 'Database error', error: err });
+        }
+        res.send({ message: 'Event unmarked as favorite!' });
+      });
+    } else {
+
+      const insertQuery = 'INSERT INTO favorites (user_id, event_id) VALUES (?, ?)';
+      db.query(insertQuery, [userId, eventId], (err) => {
+        if (err) {
+          console.error('Error marking favorite:', err);
+          return res.status(500).send({ message: 'Database error', error: err });
+        }
+        res.send({ message: 'Event marked as favorite!' });
+      });
+    }
+  });
+};
+
+module.exports = { markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance };
 

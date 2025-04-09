@@ -4,6 +4,7 @@ import '../styles/home.scss';
 
 const Home = () => {
   const [latestEvents, setLatestEvents] = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const [news, setNews] = useState([
     { title: 'Global Warming Alert', description: 'Temperatures are rising globally.' },
     { title: 'Tech Breakthrough', description: 'AI is transforming industries.' },
@@ -18,7 +19,7 @@ const Home = () => {
       try {
         const response = await axios.get('http://localhost:5001/api/events');
         const sortedEvents = response.data.sort((a, b) => new Date(b.date) - new Date(a.date));
-        setLatestEvents(sortedEvents.slice(0, 5)); 
+        setLatestEvents(sortedEvents.slice(0, 5));
       } catch (err) {
         console.error('Error fetching latest events:', err);
       }
@@ -26,15 +27,15 @@ const Home = () => {
 
     const fetchWeather = async () => {
       try {
-        const apiKey = '2c3dd76944303cadaf7dacfcde139d15'; // Replace with your OpenWeatherMap API key
+        const apiKey = '2c3dd76944303cadaf7dacfcde139d15';
         const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
         );
-        console.log('Weather API response:', response.data); // Debugging
+        console.log('Weather API response:', response.data);
         setWeather(response.data);
       } catch (err) {
         console.error('Error fetching weather data:', err);
-        setWeather(null); // Reset weather data on error
+        setWeather(null);
       }
     };
 
@@ -46,7 +47,32 @@ const Home = () => {
     e.preventDefault();
     if (searchCity.trim()) {
       setCity(searchCity.trim());
-      setSearchCity(''); // Clear the input field
+      setSearchCity('');
+    }
+  };
+
+  const handleFavorite = async (eventId) => {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+
+    if (!token || !userId) {
+      alert('You need to log in to mark favorites.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `http://localhost:5001/api/events/${eventId}/favorite`,
+        { userId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log(response.data.message);
+      setFavorites((prev) =>
+        prev.includes(eventId) ? prev.filter((id) => id !== eventId) : [...prev, eventId]
+      );
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
     }
   };
 
@@ -61,10 +87,18 @@ const Home = () => {
           <h2>Latest Events</h2>
           {latestEvents.map((event) => (
             <div key={event.id} className="event-card">
-              <h3>{event.title}</h3>
-              <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
-              <p><strong>Location:</strong> {event.location}</p>
-              <p>{event.description}</p>
+              <div className="event-details">
+                <h3>{event.title}</h3>
+                <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
+                <p><strong>Location:</strong> {event.location}</p>
+                <p>{event.description}</p>
+              </div>
+              <span
+                className={`star-icon ${favorites.includes(event.id) ? 'favorite' : ''}`}
+                onClick={() => handleFavorite(event.id)}
+              >
+                ★
+              </span>
             </div>
           ))}
         </div>
@@ -107,4 +141,5 @@ const Home = () => {
     </div>
   );
 };
+
 export default Home;

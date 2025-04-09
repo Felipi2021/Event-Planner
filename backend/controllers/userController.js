@@ -99,6 +99,18 @@ const getUserDetails = (req, res) => {
     res.send(results[0]);
   });
 };
+const getFavorites = (req, res) => {
+  const userId = req.params.userId;
+
+  const query = 'SELECT event_id FROM favorites WHERE user_id = ?';
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching favorites:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+    res.send(results);
+  });
+};
 
 const getAttendanceStatus = (req, res) => {
   const userId = req.params.userId;
@@ -113,4 +125,4 @@ const getAttendanceStatus = (req, res) => {
   });
 };
 
-module.exports = { register: [upload.single('image'), register], login, getUserDetails, getAttendanceStatus };
+module.exports = { register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus };
