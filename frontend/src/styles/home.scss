@@ -1,0 +1,177 @@
+
+.events-section {
+    flex: 0 0 70%; 
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+  
+.events-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+  
+.event-card {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f9f9f9;
+}
+  
+.event-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+  
+.event-card p {
+    font-size: 1rem;
+    color: #555;
+}
+  
+.news-section {
+    flex: 0 0 30%; 
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+  
+.news-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+  
+.news-section ul {
+    list-style: none;
+    padding: 0;
+}
+  
+.news-section li {
+    margin-bottom: 1rem;
+}
+  
+.news-section li h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+  
+.news-section li p {
+    font-size: 1rem;
+    color: #555;
+}
+  
+.weather-section {
+    flex: 1;
+    background: #e3f2fd;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    height: 50%; 
+    margin-top: 2rem; 
+}
+
+.weather-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.weather-section p {
+    font-size: 1rem;
+    color: #555;
+}
+  
+.search-panel {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+  
+.search-panel input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+  
+.search-panel button {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+  
+.search-panel button:hover {
+    background-color: #0056b3;
+}
+.home-container {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.welcome-section {
+    flex: 0 0 100%; 
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 3rem 2rem; 
+    background: linear-gradient(135deg, #6a11cb, #2575fc); 
+    color: white;
+    border-radius: 12px; 
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
+    position: relative; 
+    overflow: hidden; 
+}
+
+.welcome-section h1 {
+    font-size: 3rem; 
+    font-weight: bold; 
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
+}
+
+.welcome-section p {
+    font-size: 1.4rem; 
+    margin: 0;
+    line-height: 1.6;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3); 
+}
+
+.welcome-section::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    z-index: 0;
+    animation: float 6s ease-in-out infinite;
+}
+
+.welcome-section::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: 0;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(20px);
+    }
+}

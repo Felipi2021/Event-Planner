@@ -92,7 +92,7 @@ const Events = () => {
   
       toast.success(response.data.message);
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
-      
+
       setEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
@@ -106,20 +106,20 @@ const Events = () => {
     }
   };
 
-  return (
-    <div className="event-list-container">
-      <h2>Available Events</h2>
-      {events.map((event) => (
-        <EventCard
-          key={event.id}
-          event={event}
-          isAttending={attendanceStatus[event.id]}
-          onAttend={handleAttend}
-          onRemoveAttend={handleRemoveAttend}
-        />
-      ))}
-    </div>
-  );
+return (
+  <div className="page-container">
+    <h2>Available Events</h2>
+    {events.map((event) => (
+      <EventCard
+        key={event.id}
+        event={event}
+        isAttending={attendanceStatus[event.id]}
+        onAttend={handleAttend}
+        onRemoveAttend={handleRemoveAttend}
+      />
+    ))}
+  </div>
+);
 };
 
 export default Events;

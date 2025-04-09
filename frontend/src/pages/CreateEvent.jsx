@@ -24,7 +24,7 @@ const CreateEvent = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form-container">
+    <form onSubmit={handleSubmit} className="form-page">
       <h2>Create Event</h2>
       <div className="form__group">
         <label>Title:</label>
