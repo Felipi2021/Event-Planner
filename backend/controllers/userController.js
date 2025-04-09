@@ -67,24 +67,21 @@ const register = async (req, res) => {
 
 const login = (req, res) => {
   const { email, password } = req.body;
-  console.log('Login attempt for email:', email);
   const query = 'SELECT * FROM users WHERE email = ?';
   db.query(query, [email], (err, results) => {
     if (err || results.length === 0) {
-      console.log('User not found or database error:', err);
       return res.status(404).send({ message: 'User not found!' });
-    } else {
-      const user = results[0];
-      bcrypt.compare(password, user.password, (err, isMatch) => {
-        if (!isMatch) {
-          console.log('Invalid credentials for email:', email);
-          return res.status(401).send({ message: 'Invalid credentials!' });
-        }
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        console.log('Login successful for email:', email);
-        res.send({ token, userId: user.id });
-      });
     }
+
+    const user = results[0];
+    bcrypt.compare(password, user.password, (err, isMatch) => {
+      if (!isMatch) {
+        return res.status(401).send({ message: 'Invalid credentials!' });
+      }
+
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      res.send({ token, userId: user.id });
+    });
   });
 };
 

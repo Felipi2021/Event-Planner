@@ -1,27 +1,60 @@
 const db = require('../models/db');
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads')); 
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`); 
+  },
+});
+const upload = multer({ storage });
 
 const createEvent = (req, res) => {
-  const { title, description, date, location, capacity } = req.body;
+  try {
+    const { title, description, date, location, capacity } = req.body;
+    const image = req.file ? req.file.filename : null;
+    const created_by = req.user.id; 
 
-  const query = 'INSERT INTO events (title, description, date, location, capacity) VALUES (?, ?, ?, ?, ?)';
-  db.query(query, [title, description, date, location, capacity], (err) => {
-    if (err) return res.status(500).send(err);
-    res.status(201).send({ message: 'Event created successfully!' });
-  });
+    console.log('Received request body:', req.body);
+    console.log('Received file:', req.file);
+    console.log('User ID from token:', created_by);
+
+    if (!title || !description || !date || !location || !capacity) {
+      console.error('Validation failed. Missing fields:', { title, description, date, location, capacity });
+      return res.status(400).send({ message: 'All fields are required.' });
+    }
+
+    const query = 'INSERT INTO events (title, description, date, location, capacity, created_by, image) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    db.query(query, [title, description, date, location, capacity, created_by, image], (err) => {
+      if (err) {
+        console.error('Error inserting event into database:', err);
+        return res.status(500).send({ message: 'Failed to create event.', error: err });
+      }
+      res.status(201).send({ message: 'Event created successfully!' });
+    });
+  } catch (err) {
+    console.error('Unexpected error in createEvent:', err);
+    res.status(500).send({ message: 'Internal server error', error: err });
+  }
 };
 
 const getAllEvents = (req, res) => {
-  const query = 'SELECT * FROM events';
+  const query = `
+    SELECT events.*, users.username AS created_by_username
+    FROM events
+    LEFT JOIN users ON events.created_by = users.id
+  `;
   db.query(query, (err, results) => {
-    if (err) return res.status(500).send(err);
-    const events = results.map(event => ({
-      ...event,
-      date: event.date.toISOString().split('T')[0] 
-    }));
-    res.send(events);
+    if (err) {
+      console.error('Error fetching events:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+    res.send(results);
   });
 };
-
 const registerForEvent = (req, res) => {
   const { userId } = req.body; 
   const eventId = req.params.id; 
@@ -70,40 +103,59 @@ const markAttendance = (req, res) => {
   const { userId } = req.body;
   const eventId = req.params.id;
 
+  console.log('Received userId:', userId);
+  console.log('Received eventId:', eventId);
+
   if (!userId || !eventId) {
     return res.status(400).send({ message: 'User ID and Event ID are required.' });
   }
 
-  const checkQuery = 'SELECT * FROM registration WHERE user_id = ? AND event_id = ?';
-  db.query(checkQuery, [userId, eventId], (err, results) => {
+  const checkCapacityQuery = 'SELECT capacity, attendees_count FROM events WHERE id = ?';
+  db.query(checkCapacityQuery, [eventId], (err, results) => {
     if (err) {
       console.error('Database error:', err);
       return res.status(500).send({ message: 'Database error', error: err });
     }
-    if (results.length > 0) {
-      return res.status(400).send({ message: 'User already marked as attending this event.' });
+
+    if (results.length === 0) {
+      return res.status(404).send({ message: 'Event not found.' });
     }
 
-    const insertQuery = 'INSERT INTO registration (user_id, event_id) VALUES (?, ?)';
-    db.query(insertQuery, [userId, eventId], (err) => {
+    const { capacity, attendees_count } = results[0];
+    if (attendees_count >= capacity) {
+      return res.status(400).send({ message: 'Event has reached its capacity.' });
+    }
+
+    const checkQuery = 'SELECT * FROM registration WHERE user_id = ? AND event_id = ?';
+    db.query(checkQuery, [userId, eventId], (err, results) => {
       if (err) {
         console.error('Database error:', err);
         return res.status(500).send({ message: 'Database error', error: err });
       }
+      if (results.length > 0) {
+        return res.status(400).send({ message: 'User already marked as attending this event.' });
+      }
 
-      const updateQuery = 'UPDATE events SET attendees_count = attendees_count + 1 WHERE id = ?';
-      db.query(updateQuery, [eventId], (err) => {
+      const insertQuery = 'INSERT INTO registration (user_id, event_id) VALUES (?, ?)';
+      db.query(insertQuery, [userId, eventId], (err) => {
         if (err) {
-          console.error('Error updating attendees count:', err);
-          return res.status(500).send({ message: 'Error updating attendees count.', error: err });
+          console.error('Database error:', err);
+          return res.status(500).send({ message: 'Database error', error: err });
         }
 
-        res.send({ message: 'You have been marked as attending this event!' });
+        const updateQuery = 'UPDATE events SET attendees_count = attendees_count + 1 WHERE id = ?';
+        db.query(updateQuery, [eventId], (err) => {
+          if (err) {
+            console.error('Error updating attendees count:', err);
+            return res.status(500).send({ message: 'Error updating attendees count.', error: err });
+          }
+
+          res.send({ message: 'You have been marked as attending this event!' });
+        });
       });
     });
   });
 };
-
 const removeAttendance = (req, res) => {
   const { userId } = req.body;
   const eventId = req.params.id;
@@ -191,5 +243,5 @@ const markFavorite = (req, res) => {
   });
 };
 
-module.exports = { markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance };
+module.exports = {upload, markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance };
 

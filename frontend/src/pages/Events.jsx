@@ -14,7 +14,7 @@ const Events = () => {
       try {
         const response = await axios.get('http://localhost:5001/api/events');
         setEvents(response.data);
-  
+
         const token = localStorage.getItem('token');
         if (token) {
           const userId = localStorage.getItem('userId');
@@ -23,43 +23,42 @@ const Events = () => {
           });
           setAttendanceStatus(attendanceResponse.data);
         } else {
-          setAttendanceStatus({}); 
+          setAttendanceStatus({});
         }
       } catch (err) {
         console.error('Error fetching events:', err);
         toast.error('Failed to fetch events. Please try again.');
       }
     };
-  
+
     fetchEvents();
   }, []);
 
   const handleAttend = async (eventId) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
+      const userId = localStorage.getItem('userId');
+      if (!token || !userId) {
         toast.error('You need to log in to mark attendance.');
         return;
       }
-  
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        toast.error('User ID is missing. Please log in again.');
-        return;
+
+      const response = await fetch(`http://localhost:5001/api/events/${eventId}/attend`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to mark attendance.');
       }
-  
-      const response = await axios.post(
-        `http://localhost:5001/api/events/${eventId}/attend`,
-        { userId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-  
-      toast.success(response.data.message);
-  
-      // Update attendanceStatus
+
+      toast.success('Attendance marked successfully!');
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
-  
-      // Update events list
       setEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
@@ -67,21 +66,21 @@ const Events = () => {
             : event
         )
       );
-    } catch (err) {
-      console.error('Error marking attendance:', err);
-      toast.error('Failed to mark attendance. Please try again.');
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      toast.error(error.message);
     }
   };
 
   const handleRemoveAttend = async (eventId) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
+      const userId = localStorage.getItem('userId');
+      if (!token || !userId) {
         toast.error('You need to log in to remove attendance.');
         return;
       }
-  
-      const userId = localStorage.getItem('userId');
+
       const response = await axios.delete(
         `http://localhost:5001/api/events/${eventId}/attend`,
         {
@@ -89,10 +88,9 @@ const Events = () => {
           data: { userId },
         }
       );
-  
-      toast.success(response.data.message);
-      setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
 
+      toast.success('Attendance removed successfully!');
+      setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
       setEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
@@ -106,20 +104,20 @@ const Events = () => {
     }
   };
 
-return (
-  <div className="page-container">
-    <h2>Available Events</h2>
-    {events.map((event) => (
-      <EventCard
-        key={event.id}
-        event={event}
-        isAttending={attendanceStatus[event.id]}
-        onAttend={handleAttend}
-        onRemoveAttend={handleRemoveAttend}
-      />
-    ))}
-  </div>
-);
+  return (
+    <div className="page-container">
+      <h2>Available Events</h2>
+      {events.map((event) => (
+        <EventCard
+          key={event.id}
+          event={event}
+          isAttending={attendanceStatus[event.id]}
+          onAttend={handleAttend}
+          onRemoveAttend={handleRemoveAttend}
+        />
+      ))}
+    </div>
+  );
 };
 
 export default Events;

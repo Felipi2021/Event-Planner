@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 01, 2025 at 07:32 PM
+-- Generation Time: Apr 09, 2025 at 09:27 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -35,15 +35,35 @@ CREATE TABLE `events` (
   `location` varchar(100) NOT NULL,
   `capacity` int(11) NOT NULL,
   `attendees_count` int(11) DEFAULT 0,
-  `created_by` varchar(255) DEFAULT NULL
+  `created_by` int(11) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `events`
 --
 
-INSERT INTO `events` (`id`, `title`, `description`, `date`, `location`, `capacity`, `attendees_count`, `created_by`) VALUES
-(20, 'abc', 'def', '2026-02-12', 'faf', 12, 0, NULL);
+INSERT INTO `events` (`id`, `title`, `description`, `date`, `location`, `capacity`, `attendees_count`, `created_by`, `image`) VALUES
+(1, 'zbior psow', 'bawia sie pieski i jest fajnie', '2026-02-21', 'poznań', 10, 1, 1, '1744226818431-pieski.png');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `favorites`
+--
+
+CREATE TABLE `favorites` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `favorites`
+--
+
+INSERT INTO `favorites` (`id`, `user_id`, `event_id`) VALUES
+(1, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -62,7 +82,7 @@ CREATE TABLE `registration` (
 --
 
 INSERT INTO `registration` (`id`, `user_id`, `event_id`) VALUES
-(192, 45, 20);
+(1, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -84,8 +104,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `image`) VALUES
-(44, 'a', 'a@a.a', '$2a$10$BpN/MZDR4/LnmxME3k9dLueLjZ7.w0dUDn/AKCrFk1jKI2kTg9rvu', 'user', '1743527151266-pomaranca.png'),
-(45, 'filip', 'filip@gmail.com', '$2a$10$p1l1kD6UYVZwbv/1ZB3E2eTMXYhKBi.c2r3E6ijJK3S9klL2JQJuO', 'user', '1743528332110-pomaranca.png');
+(1, 'a', 'a@a.a', '$2a$10$Nu5YYcKAzPNJXp1.AGypBe/Xa3QgcCXweGTE3nAawO7eIqTZq8m3.', 'user', '1744226734640-amstaff.png');
 
 --
 -- Indexes for dumped tables
@@ -96,6 +115,14 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `image`) VAL
 --
 ALTER TABLE `events`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `favorites`
+--
+ALTER TABLE `favorites`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_event_unique` (`user_id`,`event_id`),
+  ADD KEY `event_id` (`event_id`);
 
 --
 -- Indexes for table `registration`
@@ -120,23 +147,36 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `favorites`
+--
+ALTER TABLE `favorites`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `registration`
 --
 ALTER TABLE `registration`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=193;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `favorites`
+--
+ALTER TABLE `favorites`
+  ADD CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `favorites_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `registration`

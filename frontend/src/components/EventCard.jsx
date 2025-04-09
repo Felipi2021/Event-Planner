@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import '../styles/global.scss';
+import '../styles/EventCard.scss';
 
 const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveAttend }) => {
   const [isAttending, setIsAttending] = useState(initialIsAttending);
-  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -33,26 +32,28 @@ const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveA
 
   return (
     <div className="event-card">
-      <h3>{event.title}</h3>
-      <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
-      <p><strong>Location:</strong> {event.location}</p>
-      <p><strong>Capacity:</strong> {event.capacity}</p>
-      <p><strong>Attendees:</strong> {event.attendees_count}</p>
-      <div className="buttonGroup">
-        {isAttending ? (
-          <button className="attending-button" onClick={() => onRemoveAttend(event.id)} disabled={loading}>
-            Remove Attendance
-          </button>
-        ) : (
-          <button className="attend-button" onClick={() => onAttend(event.id)} disabled={loading}>
-            Attend
-          </button>
-        )}
-        <button className="register-button" onClick={handleShowModal}>
-          Show Description
-        </button>
+      <div className="event-card__image">
+        {event.image && <img src={`http://localhost:5001/uploads/${event.image}`} alt={event.title} />}
       </div>
-
+      <div className="event-card__content">
+        <h3>{event.title}</h3>
+        <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
+        <p><strong>Location:</strong> {event.location}</p>
+        <p><strong>Capacity:</strong> {event.capacity}</p>
+        <p><strong>Attendees:</strong> {event.attendees_count}</p>
+        <p><strong>Created By:</strong> {event.created_by_username || 'Unknown'}</p>
+        <p><strong>Description:</strong> {event.description}</p>
+        <div className="buttonGroup">
+          {isAttending ? (
+            <button onClick={() => onRemoveAttend(event.id)}>Remove Attendance</button>
+          ) : (
+            <button onClick={() => onAttend(event.id)}>Attend</button>
+          )}
+          <button className="register-button" onClick={handleShowModal}>
+            Show Description
+          </button>
+        </div>
+      </div>
       {showModal && ReactDOM.createPortal(modalContent, document.body)}
     </div>
   );
