@@ -48,27 +48,28 @@ const Events = () => {
         return;
       }
   
-      console.log('Sending request with:', { userId, eventId });
-  
       const response = await axios.post(
         `http://localhost:5001/api/events/${eventId}/attend`,
-        { userId }, 
-        { headers: { Authorization: `Bearer ${token}` } } 
+        { userId },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
   
       toast.success(response.data.message);
   
-      const updatedEvents = await axios.get('http://localhost:5001/api/events');
-      setEvents(updatedEvents.data);
+      // Update attendanceStatus
+      setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
+  
+      // Update events list
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? { ...event, attendees_count: event.attendees_count + 1 }
+            : event
+        )
+      );
     } catch (err) {
       console.error('Error marking attendance:', err);
-      if (err.response && err.response.status === 400) {
-        toast.error(err.response.data.message || 'Bad Request. Please try again.');
-      } else if (err.response && err.response.status === 401) {
-        toast.error('Unauthorized! Please log in again.');
-      } else {
-        toast.error('Failed to mark attendance. Please try again.');
-      }
+      toast.error('Failed to mark attendance. Please try again.');
     }
   };
 
@@ -88,22 +89,20 @@ const Events = () => {
           data: { userId },
         }
       );
+  
       toast.success(response.data.message);
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
+      
       setEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
-            ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) } 
+            ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) }
             : event
         )
       );
     } catch (err) {
       console.error('Error removing attendance:', err);
-      if (err.response && err.response.data && err.response.data.message) {
-        toast.error(err.response.data.message);
-      } else {
-        toast.error('Failed to remove attendance. Please try again.');
-      }
+      toast.error('Failed to remove attendance. Please try again.');
     }
   };
 
