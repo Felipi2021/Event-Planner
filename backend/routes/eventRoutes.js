@@ -1,14 +1,16 @@
 const express = require('express');
-const {upload , markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance } = require('../controllers/eventController');
+const {upload , getEventById, markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance } = require('../controllers/eventController');
 const { verifyToken } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 router.post('/', verifyToken, upload.single('image'), createEvent);
 router.get('/', getAllEvents);
+router.get('/:id', getEventById); 
 router.post('/:id/favorite', verifyToken, markFavorite);
 router.post('/:id/register', registerForEvent);
 router.post('/:id/attend', verifyToken, markAttendance);
 router.delete('/:id/attend', verifyToken, removeAttendance);
+
 
 module.exports = router;
 

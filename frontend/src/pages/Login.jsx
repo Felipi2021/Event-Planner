@@ -10,7 +10,7 @@ const Login = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [emailValid, setEmailValid] = useState(true);
   const [emailMessage, setEmailMessage] = useState('');
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
 
   const handleEmailChange = (e) => {
     const value = e.target.value;
@@ -33,19 +33,18 @@ const Login = ({ onLogin }) => {
       return;
     }
     try {
-      console.log('Sending login request for email:', email);
       const response = await axios.post('http://localhost:5001/api/users/login', { email, password });
-      console.log('Login response:', response.data);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userId', response.data.userId);
       toast.success('Logged in successfully!');
-      onLogin();
-      navigate('/events');
+      onLogin(); 
+      navigate('/'); 
     } catch (err) {
       console.error('Login error:', err);
       toast.error('Login failed. Check your credentials.');
     }
   };
+
   return (
     <form onSubmit={handleSubmit} className="form-page">
       <h2>Login</h2>

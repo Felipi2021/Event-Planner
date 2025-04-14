@@ -7,18 +7,18 @@ import '../styles/global.scss';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
-  const [filteredEvents, setFilteredEvents] = useState([]); // For filtered events
+  const [filteredEvents, setFilteredEvents] = useState([]); 
   const [attendanceStatus, setAttendanceStatus] = useState({});
-  const [sortCriteria, setSortCriteria] = useState('name'); // Default sorting by name
-  const [sortOrder, setSortOrder] = useState('asc'); // Default sorting order: ascending
-  const [searchQuery, setSearchQuery] = useState(''); // For search input
+  const [sortCriteria, setSortCriteria] = useState('name'); 
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await axios.get('http://localhost:5001/api/events');
         setEvents(response.data);
-        setFilteredEvents(response.data); // Initialize filtered events
+        setFilteredEvents(response.data); 
 
         const token = localStorage.getItem('token');
         if (token) {
@@ -72,73 +72,73 @@ const Events = () => {
 
   const handleAttend = async (eventId) => {
     try {
-      const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId');
-      if (!token || !userId) {
-        toast.error('You need to log in to mark attendance.');
-        return;
-      }
-
-      const response = await fetch(`http://localhost:5001/api/events/${eventId}/attend`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to mark attendance.');
-      }
-
-      toast.success('Attendance marked successfully!');
-      setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === eventId
-            ? { ...event, attendees_count: event.attendees_count + 1 }
-            : event
-        )
-      );
-    } catch (error) {
-      console.error('Error marking attendance:', error);
-      toast.error(error.message);
-    }
-  };
-
-  const handleRemoveAttend = async (eventId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId');
-      if (!token || !userId) {
-        toast.error('You need to log in to remove attendance.');
-        return;
-      }
-
-      const response = await axios.delete(
-        `http://localhost:5001/api/events/${eventId}/attend`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          data: { userId },
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        if (!token || !userId) {
+            toast.error('You need to log in to mark attendance.');
+            return;
         }
-      );
 
-      toast.success('Attendance removed successfully!');
-      setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === eventId
-            ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) }
-            : event
-        )
-      );
-    } catch (err) {
-      console.error('Error removing attendance:', err);
-      toast.error('Failed to remove attendance. Please try again.');
+        const response = await fetch(`http://localhost:5001/api/events/${eventId}/attend`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ userId }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to mark attendance.');
+        }
+
+        toast.success('Attendance marked successfully!');
+        setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
+        setEvents((prevEvents) =>
+            prevEvents.map((event) =>
+                event.id === eventId
+                    ? { ...event, attendees_count: event.attendees_count + 1 }
+                    : event
+            )
+        );
+    } catch (error) {
+        console.error('Error marking attendance:', error);
+        toast.error(error.message);
     }
-  };
+};
+
+const handleRemoveAttend = async (eventId) => {
+    try {
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        if (!token || !userId) {
+            toast.error('You need to log in to remove attendance.');
+            return;
+        }
+
+        const response = await axios.delete(
+            `http://localhost:5001/api/events/${eventId}/attend`,
+            {
+                headers: { Authorization: `Bearer ${token}` },
+                data: { userId },
+            }
+        );
+
+        toast.success('Attendance removed successfully!');
+        setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
+        setEvents((prevEvents) =>
+            prevEvents.map((event) =>
+                event.id === eventId
+                    ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) }
+                    : event
+            )
+        );
+    } catch (err) {
+        console.error('Error removing attendance:', err);
+        toast.error('Failed to remove attendance. Please try again.');
+    }
+};
   return (
     <div className="page-container">
       <h2>Available Events</h2>

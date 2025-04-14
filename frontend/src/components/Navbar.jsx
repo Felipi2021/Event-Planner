@@ -8,9 +8,9 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
-    toast.success('You have been logged out successfully!'); 
-    navigate('/login'); 
-    window.location.reload(); 
+    toast.success('You have been logged out successfully!');
+    navigate('/login');
+    window.location.reload();
   };
 
   return (
@@ -25,8 +25,8 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
               <button onClick={handleLogout}>Logout</button>
             </li>
             {profileImage && (
-              <li className="profile-image-container">
-                <img src={`http://localhost:5001/uploads/${profileImage}`} alt="Profile" className="profile-image" />                
+              <li className="profile-image-container" onClick={() => navigate('/profile')}>
+                <img src={`http://localhost:5001/uploads/${profileImage}`} alt="Profile" className="profile-image" />
               </li>
             )}
           </>

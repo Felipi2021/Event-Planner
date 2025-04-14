@@ -384,7 +384,7 @@
   }
   .controls-container {
     display: flex;
-    justify-content: space-between; /* Align sorting on the left and search on the right */
+    justify-content: space-between;
     align-items: center;
     padding: 1rem;
     margin-bottom: 1.5rem;
@@ -444,3 +444,84 @@
       }
     }
   }
+  .profile-info {
+    text-align: center;
+    margin-bottom: 2rem;
+  
+    .profile-image-large {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 1rem;
+      border: 3px solid #007bff;
+    }
+  
+    p {
+      font-size: 1.2rem;
+      color: #333;
+    }
+  }
+  
+  .profile-section {
+    margin-top: 2rem;
+  
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #007bff;
+    }
+  
+    .event-card {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+  }
+  .profile-section .event-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 200px; 
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f9f9f9;
+    overflow: hidden; 
+    text-align: left;
+}
+
+.profile-section .event-card h4 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 0.5rem;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+.profile-section .event-card p {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.profile-section .event-card button {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.9rem;
+    margin-top: auto; 
+}

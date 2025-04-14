@@ -99,13 +99,19 @@ const getUserDetails = (req, res) => {
 const getFavorites = (req, res) => {
   const userId = req.params.userId;
 
-  const query = 'SELECT event_id FROM favorites WHERE user_id = ?';
+  const query = `
+    SELECT events.*
+    FROM favorites
+    JOIN events ON favorites.event_id = events.id
+    WHERE favorites.user_id = ?
+  `;
   db.query(query, [userId], (err, results) => {
     if (err) {
-      console.error('Error fetching favorites:', err);
+      console.error('Error fetching favorite events:', err);
       return res.status(500).send({ message: 'Database error', error: err });
     }
-    res.send(results);
+    console.log('Favorite Events Data:', results); 
+    res.send(results); 
   });
 };
 

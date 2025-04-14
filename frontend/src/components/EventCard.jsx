@@ -4,11 +4,24 @@ import '../styles/EventCard.scss';
 
 const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveAttend }) => {
   const [isAttending, setIsAttending] = useState(initialIsAttending);
+  const [attendeesCount, setAttendeesCount] = useState(event.attendees_count);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     setIsAttending(initialIsAttending);
   }, [initialIsAttending]);
+
+  const handleAttendClick = () => {
+    if (isAttending) {
+      onRemoveAttend(event.id);
+      setIsAttending(false);
+      setAttendeesCount((prev) => Math.max(prev - 1, 0));
+    } else {
+      onAttend(event.id);
+      setIsAttending(true);
+      setAttendeesCount((prev) => prev + 1);
+    }
+  };
 
   const handleShowModal = () => {
     setShowModal(true);
@@ -40,15 +53,12 @@ const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveA
         <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
         <p><strong>Location:</strong> {event.location}</p>
         <p><strong>Capacity:</strong> {event.capacity}</p>
-        <p><strong>Attendees:</strong> {event.attendees_count}</p>
+        <p><strong>Attendees:</strong> {attendeesCount}</p>
         <p><strong>Created By:</strong> {event.created_by_username || 'Unknown'}</p>
-        <p><strong>Description:</strong> {event.description}</p>
         <div className="buttonGroup">
-          {isAttending ? (
-            <button onClick={() => onRemoveAttend(event.id)}>Remove Attendance</button>
-          ) : (
-            <button onClick={() => onAttend(event.id)}>Attend</button>
-          )}
+          <button onClick={handleAttendClick}>
+            {isAttending ? 'Remove Attendance' : 'Attend'}
+          </button>
           <button className="register-button" onClick={handleShowModal}>
             Show Description
           </button>

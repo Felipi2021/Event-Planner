@@ -42,11 +42,17 @@ const createEvent = (req, res) => {
 };
 
 const getAllEvents = (req, res) => {
-  const query = `
+  const { created_by } = req.query;
+  let query = `
     SELECT events.*, users.username AS created_by_username
     FROM events
     LEFT JOIN users ON events.created_by = users.id
   `;
+
+  if (created_by) {
+    query += ` WHERE events.created_by = ${db.escape(created_by)}`;
+  }
+
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching events:', err);
@@ -55,6 +61,30 @@ const getAllEvents = (req, res) => {
     res.send(results);
   });
 };
+const getEventById = (req, res) => {
+  const eventId = req.params.id;
+
+  const query = `
+    SELECT events.*, users.username AS created_by_username
+    FROM events
+    LEFT JOIN users ON events.created_by = users.id
+    WHERE events.id = ?
+  `;
+
+  db.query(query, [eventId], (err, results) => {
+    if (err) {
+      console.error('Error fetching event details:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).send({ message: 'Event not found' });
+    }
+
+    res.send(results[0]); 
+  });
+};
+
 const registerForEvent = (req, res) => {
   const { userId } = req.body; 
   const eventId = req.params.id; 
@@ -243,5 +273,5 @@ const markFavorite = (req, res) => {
   });
 };
 
-module.exports = {upload, markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance };
+module.exports = {upload, getEventById, markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance };
 
