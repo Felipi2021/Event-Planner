@@ -8,8 +8,8 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
-    toast.success('You have been logged out.');
-    navigate('/login');
+    toast.success('You have been logged out successfully!'); 
+    navigate('/login'); 
     window.location.reload(); 
   };
 

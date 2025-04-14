@@ -126,7 +126,16 @@ const Home = () => {
               <button type="submit">Search</button>
             </form>
             {weather ? (
-              <div>
+              <div className="weather-details">
+                <img
+                  src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+                  alt={weather.weather[0].description}
+                  className="weather-icon"
+                  onError={(e) => {
+                    console.error('Error loading weather icon:', e.target.src);
+                    e.target.src = ''; 
+                  }}
+                />
                 <p><strong>Temperature:</strong> {weather.main.temp}°C</p>
                 <p><strong>Condition:</strong> {weather.weather[0].description}</p>
                 <p><strong>Humidity:</strong> {weather.main.humidity}%</p>

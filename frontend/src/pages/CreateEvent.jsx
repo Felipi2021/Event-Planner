@@ -21,13 +21,13 @@ const CreateEvent = () => {
     e.preventDefault();
   
     try {
-      const token = localStorage.getItem('token'); // Retrieve the token
+      const token = localStorage.getItem('token'); 
       if (!token) {
         toast.error('You need to log in to create an event.');
         return;
       }
   
-      console.log('Token:', token); // Log the token for debugging
+      console.log('Token:', token); 
   
       const formData = new FormData();
       formData.append('title', title);
