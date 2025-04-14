@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import '../styles/home.scss';
 
 const Home = () => {
@@ -56,7 +58,7 @@ const Home = () => {
     const userId = localStorage.getItem('userId');
 
     if (!token || !userId) {
-      alert('You need to log in to mark favorites.');
+      toast.error('You need to log in to mark favorites.');
       return;
     }
 
@@ -67,12 +69,19 @@ const Home = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log(response.data.message);
+      const isFavorite = favorites.includes(eventId);
       setFavorites((prev) =>
-        prev.includes(eventId) ? prev.filter((id) => id !== eventId) : [...prev, eventId]
+        isFavorite ? prev.filter((id) => id !== eventId) : [...prev, eventId]
       );
+
+      if (isFavorite) {
+        toast.info('Event removed from favorites.');
+      } else {
+        toast.success('Event added to favorites!');
+      }
     } catch (err) {
       console.error('Error toggling favorite:', err);
+      toast.error('Failed to update favorite status. Please try again.');
     }
   };
 

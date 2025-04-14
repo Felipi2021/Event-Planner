@@ -83,31 +83,33 @@ const Profile = () => {
                             onClick={() => handleEventClick(event.id)}
                             style={{ cursor: 'pointer' }}
                         >
-                            <h4>{event.title}</h4>
-                            <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
-                            <p><strong>Location:</strong> {event.location}</p>
-                            <p>
-                                {expandedDescriptions[event.id]
-                                    ? event.description
-                                    : truncateText(event.description, 100)}
-                                {event.description.length > 100 && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleDescription(event.id);
-                                        }}
-                                        style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            color: '#007bff',
-                                            cursor: 'pointer',
-                                            padding: 0,
-                                        }}
-                                    >
-                                        {expandedDescriptions[event.id] ? 'View Less' : 'View More'}
-                                    </button>
-                                )}
-                            </p>
+                            <div className="event-info">
+                                <h4>{event.title}</h4>
+                                <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
+                                <p><strong>Location:</strong> {event.location}</p>
+                                <p>
+                                    {expandedDescriptions[event.id]
+                                        ? event.description
+                                        : truncateText(event.description, 100)}
+                                    {event.description.length > 100 && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleDescription(event.id);
+                                            }}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: '#007bff',
+                                                cursor: 'pointer',
+                                                padding: 0,
+                                            }}
+                                        >
+                                            {expandedDescriptions[event.id] ? 'View Less' : 'View More'}
+                                        </button>
+                                    )}
+                                </p>
+                            </div>
                         </div>
                     ))
                 ) : (
@@ -124,24 +126,26 @@ const Profile = () => {
                             onClick={() => handleEventClick(event.id)}
                             style={{ cursor: 'pointer' }}
                         >
-                            <h4>{event.title}</h4>
-                            <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
-                            <p><strong>Location:</strong> {event.location}</p>
-                            <p>
-                                {expandedDescriptions[event.id]
-                                    ? event.description
-                                    : truncateText(event.description, 100)}
-                                {event.description.length > 100 && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleDescription(event.id);
-                                        }}
-                                    >
-                                        {expandedDescriptions[event.id] ? 'View Less' : 'View More'}
-                                    </button>
-                                )}
-                            </p>
+                            <div className="event-info">
+                                <h4>{event.title}</h4>
+                                <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
+                                <p><strong>Location:</strong> {event.location}</p>
+                                <p>
+                                    {expandedDescriptions[event.id]
+                                        ? event.description
+                                        : truncateText(event.description, 100)}
+                                    {event.description.length > 100 && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleDescription(event.id);
+                                            }}
+                                        >
+                                            {expandedDescriptions[event.id] ? 'View Less' : 'View More'}
+                                        </button>
+                                    )}
+                                </p>
+                            </div>
                         </div>
                     ))
                 ) : (

@@ -109,35 +109,35 @@ const Events = () => {
 };
 
 const handleRemoveAttend = async (eventId) => {
-    try {
-        const token = localStorage.getItem('token');
-        const userId = localStorage.getItem('userId');
-        if (!token || !userId) {
-            toast.error('You need to log in to remove attendance.');
-            return;
-        }
+  try {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      if (!token || !userId) {
+          toast.error('You need to log in to remove attendance.');
+          return;
+      }
 
-        const response = await axios.delete(
-            `http://localhost:5001/api/events/${eventId}/attend`,
-            {
-                headers: { Authorization: `Bearer ${token}` },
-                data: { userId },
-            }
-        );
+      const response = await axios.delete(
+          `http://localhost:5001/api/events/${eventId}/attend`,
+          {
+              headers: { Authorization: `Bearer ${token}` },
+              data: { userId },
+          }
+      );
 
-        toast.success('Attendance removed successfully!');
-        setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
-        setEvents((prevEvents) =>
-            prevEvents.map((event) =>
-                event.id === eventId
-                    ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) }
-                    : event
-            )
-        );
-    } catch (err) {
-        console.error('Error removing attendance:', err);
-        toast.error('Failed to remove attendance. Please try again.');
-    }
+      toast.info('Attendance removed successfully!'); 
+      setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
+      setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+              event.id === eventId
+                  ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) }
+                  : event
+          )
+      );
+  } catch (err) {
+      console.error('Error removing attendance:', err);
+      toast.error('Failed to remove attendance. Please try again.');
+  }
 };
   return (
     <div className="page-container">
