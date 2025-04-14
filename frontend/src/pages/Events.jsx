@@ -7,13 +7,18 @@ import '../styles/global.scss';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]); // For filtered events
   const [attendanceStatus, setAttendanceStatus] = useState({});
+  const [sortCriteria, setSortCriteria] = useState('name'); // Default sorting by name
+  const [sortOrder, setSortOrder] = useState('asc'); // Default sorting order: ascending
+  const [searchQuery, setSearchQuery] = useState(''); // For search input
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await axios.get('http://localhost:5001/api/events');
         setEvents(response.data);
+        setFilteredEvents(response.data); // Initialize filtered events
 
         const token = localStorage.getItem('token');
         if (token) {
@@ -33,6 +38,37 @@ const Events = () => {
 
     fetchEvents();
   }, []);
+
+  const handleSort = (criteria, order) => {
+    setSortCriteria(criteria);
+    setSortOrder(order);
+
+    const sortedEvents = [...filteredEvents];
+    if (criteria === 'name') {
+      sortedEvents.sort((a, b) =>
+        order === 'asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
+      );
+    } else if (criteria === 'date') {
+      sortedEvents.sort((a, b) =>
+        order === 'asc' ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date)
+      );
+    } else if (criteria === 'capacity') {
+      sortedEvents.sort((a, b) =>
+        order === 'asc' ? a.capacity - b.capacity : b.capacity - a.capacity
+      );
+    }
+    setFilteredEvents(sortedEvents);
+  };
+
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    const filtered = events.filter((event) =>
+      event.title.toLowerCase().includes(query)
+    );
+    setFilteredEvents(filtered);
+  };
 
   const handleAttend = async (eventId) => {
     try {
@@ -103,11 +139,40 @@ const Events = () => {
       toast.error('Failed to remove attendance. Please try again.');
     }
   };
-
   return (
     <div className="page-container">
       <h2>Available Events</h2>
-      {events.map((event) => (
+      <div className="controls-container">
+        <div className="sort-controls">
+          <label>Sort by:</label>
+          <select
+            onChange={(e) => handleSort(e.target.value, sortOrder)}
+            value={sortCriteria}
+          >
+            <option value="name">Name</option>
+            <option value="date">Date of Publish</option>
+            <option value="capacity">Capacity</option>
+          </select>
+          <label>Order:</label>
+          <select
+            onChange={(e) => handleSort(sortCriteria, e.target.value)}
+            value={sortOrder}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+        <div className="search-controls">
+          <label>Search:</label>
+          <input
+            type="text"
+            placeholder="Search events by title"
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+        </div>
+      </div>
+      {filteredEvents.map((event) => (
         <EventCard
           key={event.id}
           event={event}
