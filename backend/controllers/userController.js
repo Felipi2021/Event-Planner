@@ -64,6 +64,19 @@ const register = async (req, res) => {
   }
 };
 
+const updateDescription = (req, res) => {
+  const userId = req.params.userId;
+  const { description } = req.body;
+
+  const query = 'UPDATE users SET description = ? WHERE id = ?';
+  db.query(query, [description, userId], (err) => {
+    if (err) {
+      console.error('Error updating description:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+    res.send({ message: 'Description updated successfully!' });
+  });
+};
 
 const login = (req, res) => {
   const { email, password } = req.body;
@@ -128,4 +141,4 @@ const getAttendanceStatus = (req, res) => {
   });
 };
 
-module.exports = { register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus };
+module.exports = { updateDescription, register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus };

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css'; 
 import '../styles/EventDetails.scss';
 
 const EventDetails = () => {
@@ -54,7 +56,7 @@ const EventDetails = () => {
             const token = localStorage.getItem('token');
             const userId = localStorage.getItem('userId');
             if (!token || !userId) {
-                alert('You need to log in to mark attendance.');
+                toast.error('You need to log in to mark attendance.');
                 return;
             }
 
@@ -65,7 +67,7 @@ const EventDetails = () => {
                 });
                 setIsAttending(false);
                 setAttendeesCount((prev) => Math.max(prev - 1, 0));
-                alert('You are no longer attending this event.');
+                toast.info('You are no longer attending this event.');
             } else {
                 await axios.post(
                     `http://localhost:5001/api/events/${id}/attend`,
@@ -74,42 +76,46 @@ const EventDetails = () => {
                 );
                 setIsAttending(true);
                 setAttendeesCount((prev) => prev + 1);
-                alert('You are now attending this event.');
+                toast.success('You are now attending this event.');
             }
         } catch (err) {
             console.error('Error updating attendance:', err);
-            alert('Failed to update attendance. Please try again.');
+            toast.error('Failed to update attendance. Please try again.');
         }
     };
 
     const handleCommentSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                alert('You need to log in to comment.');
-                return;
-            }
-
-            const response = await axios.post(
-                `http://localhost:5001/api/events/${id}/comments`,
-                { text: newComment },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            setComments((prevComments) => [
-                ...prevComments,
-                {
-                    ...response.data,
-                    userAvatar: response.data.userAvatar || 'default-avatar.png',
-                },
-            ]);
-            setNewComment('');
-        } catch (err) {
-            console.error('Error submitting comment:', err);
-            alert('Failed to submit comment. Please try again.');
+    e.preventDefault();
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            toast.error('You need to log in to comment.');
+            return;
         }
-    };
+
+        const response = await axios.post(
+            `http://localhost:5001/api/events/${id}/comments`,
+            { text: newComment },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        setComments((prevComments) => [
+            ...prevComments,
+            {
+                id: response.data.id,
+                text: response.data.text,
+                username: response.data.username,
+                userAvatar: response.data.userAvatar,
+                created_at: response.data.created_at,
+            },
+        ]);
+        setNewComment('');
+        toast.success('Comment added successfully!');
+    } catch (err) {
+        console.error('Error submitting comment:', err);
+        toast.error('Failed to submit comment. Please try again.');
+    }
+};
 
     if (loading) {
         return <p className="loading-text">Loading event details...</p>;
@@ -137,18 +143,21 @@ const EventDetails = () => {
             <div className="event-content">
                 <div className="event-image-container">
                     {event.image && (
-                        <img
-                            src={`http://localhost:5001/uploads/${event.image}`}
-                            alt={event.title}
-                            className="event-image"
-                        />
+                        <div className="image-wrapper">
+                            <img
+                                src={`http://localhost:5001/uploads/${event.image}`}
+                                alt={event.title}
+                                className="event-image"
+                            />
+                        </div>
                     )}
                 </div>
-                <div className='event-contariner'>
+                <div className="event-container">
                     <div className="event-info">
                         <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
                         <p><strong>Location:</strong> {event.location}</p>
                         <p><strong>Created By:</strong> {event.created_by_username || 'Unknown'}</p>
+                        <p><strong>Capacity:</strong> {event.capacity}</p>
                         <p><strong>Attendees:</strong> {attendeesCount}</p>
                     </div>
                     <div className="event-description-section">

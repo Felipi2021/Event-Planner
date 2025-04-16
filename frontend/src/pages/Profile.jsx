@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import '../styles/global.scss';
+import '../styles/profile.scss';
 
 const Profile = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [createdEvents, setCreatedEvents] = useState([]);
   const [favoriteEvents, setFavoriteEvents] = useState([]);
-  const [showCreatedEvents, setShowCreatedEvents] = useState(false); // Toggle for created events
-  const [showFavoriteEvents, setShowFavoriteEvents] = useState(false); // Toggle for favorite events
+  const [description, setDescription] = useState('');
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [showCreatedEvents, setShowCreatedEvents] = useState(false);
+  const [showFavoriteEvents, setShowFavoriteEvents] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -60,19 +62,69 @@ const Profile = () => {
       [eventId]: !prev[eventId],
     }));
   };
+  const handleDescriptionSubmit = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
 
+      if (!token || !userId) {
+        toast.error('You need to log in to update your description.');
+        return;
+      }
+
+      await axios.put(
+        `http://localhost:5001/api/users/${userId}/description`,
+        { description },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success('Description updated successfully!');
+      setIsEditingDescription(false);
+    } catch (err) {
+      console.error('Error updating description:', err);
+      toast.error('Failed to update description. Please try again.');
+    }
+  };
   return (
     <div className="page-container">
       <h2>My Profile</h2>
       {userInfo && (
-        <div className="profile-info">
-          <img
-            src={`http://localhost:5001/uploads/${userInfo.image}`}
-            alt="Profile"
-            className="profile-image-large"
-          />
-          <p><strong>Username:</strong> {userInfo.username}</p>
-          <p><strong>Email:</strong> {userInfo.email}</p>
+        <div className="profile-header">
+          <div className="profile-image-container">
+            <img
+              src={`http://localhost:5001/uploads/${userInfo.image}`}
+              alt="Profile"
+              className="profile-image-large"
+            />
+          </div>
+          <div className="profile-info">
+            <p><strong>Username:</strong> {userInfo.username}</p>
+            <p><strong>Email:</strong> {userInfo.email}</p>
+            {isEditingDescription ? (
+              <div className="description-edit">
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Add a description about yourself..."
+                  rows="3"
+                ></textarea>
+                <div className="button-group">
+                  <button onClick={handleDescriptionSubmit}>Save</button>
+                  <button
+                    className="cancel-button"
+                    onClick={() => setIsEditingDescription(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p><strong>Description:</strong> {description || 'No description added.'}</p>
+                <button onClick={() => setIsEditingDescription(true)}>Add Description +</button>
+              </>
+            )}
+          </div>
         </div>
       )}
       <div className="profile-section">

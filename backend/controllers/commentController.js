@@ -34,7 +34,12 @@ const addComment = (req, res) => {
             return res.status(500).send({ message: 'Database error', error: err });
         }
 
-        const fetchUserQuery = 'SELECT username, COALESCE(image, "default-avatar.png") AS userAvatar FROM users WHERE id = ?';        db.query(fetchUserQuery, [userId], (userErr, userResult) => {
+        const fetchUserQuery = `
+            SELECT username, COALESCE(image, 'default-avatar.png') AS userAvatar 
+            FROM users 
+            WHERE id = ?
+        `;
+        db.query(fetchUserQuery, [userId], (userErr, userResult) => {
             if (userErr) {
                 console.error('Error fetching user details:', userErr);
                 return res.status(500).send({ message: 'Database error', error: userErr });
@@ -45,7 +50,8 @@ const addComment = (req, res) => {
                 id: result.insertId,
                 text,
                 username: user.username,
-                userAvatar: user.image || 'default-avatar.png', 
+                userAvatar: user.userAvatar, 
+                created_at: new Date(), 
             });
         });
     });

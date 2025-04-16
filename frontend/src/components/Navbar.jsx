@@ -16,13 +16,19 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
   return (
     <nav className="navbar">
       <ul>
-        <li><button><Link to="/">Home</Link></button></li>
-        <li><button><Link to="/events">Events</Link></button></li>
-        <li><button><Link to="/CreateEvent">Create Event</Link></button></li>
+        <li>
+          <Link to="/" className="navbar-button">Home</Link>
+        </li>
+        <li>
+          <Link to="/events" className="navbar-button">Events</Link>
+        </li>
+        <li>
+          <Link to="/CreateEvent" className="navbar-button">Create Event</Link>
+        </li>
         {isLoggedIn ? (
           <>
             <li>
-              <button onClick={handleLogout}>Logout</button>
+              <button className="navbar-button" onClick={handleLogout}>Logout</button>
             </li>
             {profileImage && (
               <li className="profile-image-container" onClick={() => navigate('/profile')}>
@@ -32,8 +38,12 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
           </>
         ) : (
           <>
-            <li><button><Link to="/login">Login</Link></button></li>
-            <li><button><Link to="/register">Register</Link></button></li>
+            <li>
+              <Link to="/login" className="navbar-button">Login</Link>
+            </li>
+            <li>
+              <Link to="/register" className="navbar-button">Register</Link>
+            </li>
           </>
         )}
       </ul>

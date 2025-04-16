@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EventCard from '../components/EventCard';
-import '../styles/global.scss';
+import '../styles/events.scss';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
