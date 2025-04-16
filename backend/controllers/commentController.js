@@ -3,12 +3,12 @@ const db = require('../models/db');
 const getComments = (req, res) => {
     const eventId = req.params.id;
     const query = `
-        SELECT comments.*, users.username
-        FROM comments
-        JOIN users ON comments.user_id = users.id
-        WHERE comments.event_id = ?
-        ORDER BY comments.created_at ASC
-    `;
+    SELECT comments.*, users.username, users.image AS userAvatar
+    FROM comments
+    JOIN users ON comments.user_id = users.id
+    WHERE comments.event_id = ?
+    ORDER BY comments.created_at ASC
+`;
     db.query(query, [eventId], (err, results) => {
         if (err) {
             console.error('Error fetching comments:', err);
@@ -34,8 +34,7 @@ const addComment = (req, res) => {
             return res.status(500).send({ message: 'Database error', error: err });
         }
 
-        const fetchUserQuery = 'SELECT username, image FROM users WHERE id = ?';
-        db.query(fetchUserQuery, [userId], (userErr, userResult) => {
+        const fetchUserQuery = 'SELECT username, COALESCE(image, "default-avatar.png") AS userAvatar FROM users WHERE id = ?';        db.query(fetchUserQuery, [userId], (userErr, userResult) => {
             if (userErr) {
                 console.error('Error fetching user details:', userErr);
                 return res.status(500).send({ message: 'Database error', error: userErr });
