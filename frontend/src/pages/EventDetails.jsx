@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'react-toastify'; 
-import 'react-toastify/dist/ReactToastify.css'; 
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import '../styles/EventDetails.scss';
 
 const EventDetails = () => {
@@ -12,6 +13,7 @@ const EventDetails = () => {
     const [error, setError] = useState(null);
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [comments, setComments] = useState([]);
+    const navigate = useNavigate();
     const [newComment, setNewComment] = useState('');
     const [isAttending, setIsAttending] = useState(false);
     const [attendeesCount, setAttendeesCount] = useState(0);
@@ -85,37 +87,37 @@ const EventDetails = () => {
     };
 
     const handleCommentSubmit = async (e) => {
-    e.preventDefault();
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            toast.error('You need to log in to comment.');
-            return;
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('You need to log in to comment.');
+                return;
+            }
+
+            const response = await axios.post(
+                `http://localhost:5001/api/events/${id}/comments`,
+                { text: newComment },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setComments((prevComments) => [
+                ...prevComments,
+                {
+                    id: response.data.id,
+                    text: response.data.text,
+                    username: response.data.username,
+                    userAvatar: response.data.userAvatar,
+                    created_at: response.data.created_at,
+                },
+            ]);
+            setNewComment('');
+            toast.success('Comment added successfully!');
+        } catch (err) {
+            console.error('Error submitting comment:', err);
+            toast.error('Failed to submit comment. Please try again.');
         }
-
-        const response = await axios.post(
-            `http://localhost:5001/api/events/${id}/comments`,
-            { text: newComment },
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        setComments((prevComments) => [
-            ...prevComments,
-            {
-                id: response.data.id,
-                text: response.data.text,
-                username: response.data.username,
-                userAvatar: response.data.userAvatar,
-                created_at: response.data.created_at,
-            },
-        ]);
-        setNewComment('');
-        toast.success('Comment added successfully!');
-    } catch (err) {
-        console.error('Error submitting comment:', err);
-        toast.error('Failed to submit comment. Please try again.');
-    }
-};
+    };
 
     if (loading) {
         return <p className="loading-text">Loading event details...</p>;
@@ -156,7 +158,15 @@ const EventDetails = () => {
                     <div className="event-info">
                         <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
                         <p><strong>Location:</strong> {event.location}</p>
-                        <p><strong>Created By:</strong> {event.created_by_username || 'Unknown'}</p>
+                        <p>
+                            <strong>Created By:</strong>{' '}
+                            <span
+                                style={{ color: '#007bff', cursor: 'pointer', textDecoration: 'underline' }}
+                                onClick={() => navigate(`/profile/${event.created_by}`)} 
+                            >
+                                {event.created_by_username || 'Unknown'}
+                            </span>
+                        </p>
                         <p><strong>Capacity:</strong> {event.capacity}</p>
                         <p><strong>Attendees:</strong> {attendeesCount}</p>
                     </div>
@@ -207,6 +217,8 @@ const EventDetails = () => {
                                 src={`http://localhost:5001/uploads/${encodeURIComponent(comment.userAvatar || 'default-avatar.png')}`}
                                 alt={`${comment.username}'s avatar`}
                                 className="comment-card-image"
+                                onClick={() => navigate(`/profile/${comment.user_id}`)} 
+                                style={{ cursor: 'pointer' }} 
                             />
                             <div className="comment-card-content">
                                 <p><strong>{comment.username}:</strong></p>

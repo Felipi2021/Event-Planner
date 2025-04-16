@@ -37,16 +37,16 @@ const register = async (req, res) => {
       }
 
       if (results.length > 0) {
-        console.log('Email already exists:', email); 
+        console.log('Email already exists:', email);
         return res.status(400).send({ message: 'Email is already in use.' });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const query = 'INSERT INTO users (username, email, password, image) VALUES (?, ?, ?, ?)';
+      const query = 'INSERT INTO users (username, email, password, image, created_at) VALUES (?, ?, ?, ?, NOW())';
       db.query(query, [username, email, hashedPassword, image], (err) => {
         if (err) {
           if (err.code === 'ER_DUP_ENTRY') {
-            console.log('Duplicate email error:', email); 
+            console.log('Duplicate email error:', email);
             return res.status(400).send({ message: 'Email is already in use.' });
           }
 
@@ -98,15 +98,54 @@ const login = (req, res) => {
   });
 };
 
+const addRating = (req, res) => {
+  const { ratedId, rating } = req.body;
+  const raterId = req.user.id; 
+
+  if (!ratedId || !rating) {
+    return res.status(400).send({ message: 'Rated user ID and rating are required.' });
+  }
+
+  const query = `
+    INSERT INTO ratings (rater_id, rated_id, rating, created_at)
+    VALUES (?, ?, ?, NOW())
+    ON DUPLICATE KEY UPDATE rating = VALUES(rating)
+  `;
+  db.query(query, [raterId, ratedId, rating], (err) => {
+    if (err) {
+      console.error('Error adding rating:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+    res.send({ message: 'Rating submitted successfully!' });
+  });
+};
+
+const getAverageRating = (req, res) => {
+  const ratedId = req.params.userId;
+
+  const query = `
+    SELECT AVG(rating) AS averageRating
+    FROM ratings
+    WHERE rated_id = ?
+  `;
+  db.query(query, [ratedId], (err, results) => {
+    if (err) {
+      console.error('Error fetching average rating:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+    const averageRating = results[0].averageRating || 0;
+    res.send({ averageRating: parseFloat(averageRating) });
+  });
+};
+
 const getUserDetails = (req, res) => {
   const userId = req.params.userId;
-  const query = 'SELECT username, email, image FROM users WHERE id = ?';
+  const query = 'SELECT username, email, image, created_at FROM users WHERE id = ?';
   db.query(query, [userId], (err, results) => {
     if (err || results.length === 0) {
       return res.status(404).send({ message: 'User not found!' });
     }
-    console.log('User Details:', results[0]); 
-    res.send(results[0]);
+    res.send(results[0]); 
   });
 };
 const getFavorites = (req, res) => {
@@ -123,8 +162,7 @@ const getFavorites = (req, res) => {
       console.error('Error fetching favorite events:', err);
       return res.status(500).send({ message: 'Database error', error: err });
     }
-    console.log('Favorite Events Data:', results); 
-    res.send(results); 
+    res.send(results);
   });
 };
 
@@ -141,4 +179,4 @@ const getAttendanceStatus = (req, res) => {
   });
 };
 
-module.exports = { updateDescription, register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus };
+module.exports = { addRating, getAverageRating, updateDescription, register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus };

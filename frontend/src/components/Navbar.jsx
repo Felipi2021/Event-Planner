@@ -13,6 +13,15 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
     window.location.reload();
   };
 
+  const handleProfileClick = () => {
+    const userId = localStorage.getItem('userId'); 
+    if (userId) {
+      navigate(`/profile/${userId}`); 
+    } else {
+      toast.error('Failed to load profile data.');
+    }
+  };
+
   return (
     <nav className="navbar">
       <ul>
@@ -31,8 +40,12 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
               <button className="navbar-button" onClick={handleLogout}>Logout</button>
             </li>
             {profileImage && (
-              <li className="profile-image-container" onClick={() => navigate('/profile')}>
-                <img src={`http://localhost:5001/uploads/${profileImage}`} alt="Profile" className="profile-image" />
+              <li className="profile-image-container" onClick={handleProfileClick}>
+                <img
+                  src={`http://localhost:5001/uploads/${profileImage}`}
+                  alt="Profile"
+                  className="profile-image"
+                />
               </li>
             )}
           </>

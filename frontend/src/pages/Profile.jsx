@@ -1,34 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import ReactStars from 'react-rating-stars-component';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import '../styles/profile.scss';
 
 const Profile = () => {
+  const { userId } = useParams(); 
+  const loggedInUserId = localStorage.getItem('userId'); 
   const [userInfo, setUserInfo] = useState(null);
+  const [expandedDescriptions, setExpandedDescriptions] = useState({});
   const [createdEvents, setCreatedEvents] = useState([]);
   const [favoriteEvents, setFavoriteEvents] = useState([]);
   const [description, setDescription] = useState('');
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [showCreatedEvents, setShowCreatedEvents] = useState(false);
   const [showFavoriteEvents, setShowFavoriteEvents] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
+  const [userRating, setUserRating] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const userId = localStorage.getItem('userId');
-
-        if (!token || !userId) {
-          toast.error('You need to log in to access your profile.');
-          return;
-        }
 
         const userResponse = await axios.get(`http://localhost:5001/api/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserInfo(userResponse.data);
+
+        const ratingResponse = await axios.get(`http://localhost:5001/api/users/${userId}/average-rating`);
+        setAverageRating(ratingResponse.data.averageRating);
 
         const createdEventsResponse = await axios.get(`http://localhost:5001/api/events?created_by=${userId}`);
         setCreatedEvents(createdEventsResponse.data);
@@ -42,38 +46,42 @@ const Profile = () => {
         toast.error('Failed to load profile data.');
       }
     };
-
+  
     fetchProfileData();
-  }, []);
+  }, [userId]);
 
-  const handleEventClick = (eventId) => {
-    navigate(`/events/${eventId}`);
-  };
-
-  const truncateText = (text, length) => {
-    return text.length > length ? text.substring(0, length) + '...' : text;
-  };
-
-  const [expandedDescriptions, setExpandedDescriptions] = useState({});
-
-  const toggleDescription = (eventId) => {
-    setExpandedDescriptions((prev) => ({
-      ...prev,
-      [eventId]: !prev[eventId],
-    }));
+  const handleRatingChange = async (newRating) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('You need to log in to rate.');
+        return;
+      }
+  
+      await axios.post(
+        'http://localhost:5001/api/users/rate',
+        { ratedId: userId, rating: newRating },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      setUserRating(newRating); 
+      toast.success('Rating submitted successfully!');
+    } catch (err) {
+      console.error('Error submitting rating:', err);
+      toast.error('Failed to submit rating. Please try again.');
+    }
   };
   const handleDescriptionSubmit = async () => {
     try {
       const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId');
 
-      if (!token || !userId) {
+      if (!token || !loggedInUserId) {
         toast.error('You need to log in to update your description.');
         return;
       }
 
       await axios.put(
-        `http://localhost:5001/api/users/${userId}/description`,
+        `http://localhost:5001/api/users/${loggedInUserId}/description`,
         { description },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -85,48 +93,95 @@ const Profile = () => {
       toast.error('Failed to update description. Please try again.');
     }
   };
+  const toggleDescription = (eventId) => {
+    setExpandedDescriptions((prevState) => ({
+      ...prevState,
+      [eventId]: !prevState[eventId], 
+    }));
+  };
+  const handleEventClick = (eventId) => {
+    navigate(`/events/${eventId}`); 
+  };
   return (
     <div className="page-container">
-      <h2>My Profile</h2>
-      {userInfo && (
-        <div className="profile-header">
-          <div className="profile-image-container">
-            <img
-              src={`http://localhost:5001/uploads/${userInfo.image}`}
-              alt="Profile"
-              className="profile-image-large"
-            />
-          </div>
-          <div className="profile-info">
-            <p><strong>Username:</strong> {userInfo.username}</p>
-            <p><strong>Email:</strong> {userInfo.email}</p>
-            {isEditingDescription ? (
-              <div className="description-edit">
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add a description about yourself..."
-                  rows="3"
-                ></textarea>
-                <div className="button-group">
-                  <button onClick={handleDescriptionSubmit}>Save</button>
-                  <button
-                    className="cancel-button"
-                    onClick={() => setIsEditingDescription(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
+      <div className="profile-container">
+        {userInfo ? (
+          <>
+            <div className="profile">
+              <div className="profile-image-container">
+                <img
+                  src={`http://localhost:5001/uploads/${userInfo.image}`}
+                  alt="Profile"
+                  className="profile-image-large"
+                />
               </div>
-            ) : (
-              <>
-                <p><strong>Description:</strong> {description || 'No description added.'}</p>
-                <button onClick={() => setIsEditingDescription(true)}>Add Description +</button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+              <div className="profile-info">
+                <p><strong>Username:</strong> {userInfo.username}</p>
+                <p><strong>Email:</strong> {userInfo.email}</p>
+                <p>
+                  <strong>Created:</strong>{' '}
+                  {userInfo.created_at ? new Date(userInfo.created_at).toLocaleDateString() : 'N/A'}
+                </p>
+                <p><strong>Average Rating:</strong> {averageRating ? averageRating.toFixed(1) : 'No ratings yet'} / 5</p>              
+              </div>
+              
+            </div>
+            <div className="description">
+              <h3>Description</h3>
+              {userId === loggedInUserId ? ( 
+                isEditingDescription ? (
+                  <div className="description-edit">
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Add a description about yourself..."
+                      rows="3"
+                    />
+                    <div className="button-group">
+                      <button onClick={handleDescriptionSubmit}>Save</button>
+                      <button
+                        className="cancel-button"
+                        onClick={() => setIsEditingDescription(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p>{description || 'No description added.'}</p>
+                    <p
+                      className="add-description"
+                      onClick={() => setIsEditingDescription(true)}
+                    >
+                      Add Description +
+                    </p>
+                  </>
+                )
+              ) : (
+                <p>{userInfo.description || 'No description added.'}</p> 
+              )}
+            </div>
+            <div className="rating-section">
+              {userId !== loggedInUserId ? (
+                <ReactStars
+                  count={5}
+                  value={userRating}
+                  onChange={handleRatingChange}
+                  size={30}
+                  isHalf={true}
+                  activeColor="#ffd700"
+                />
+              ) : (
+                <p>You cannot rate yourself.</p>
+              )}
+            </div>
+          </>
+        ) : (
+          <p>Cannot load profile data...</p>
+        )}
+      </div>
+
       <div className="profile-section">
         <h3
           className="toggle-heading"
@@ -150,11 +205,11 @@ const Profile = () => {
                 <p>
                   {expandedDescriptions[event.id]
                     ? event.description
-                    : truncateText(event.description, 100)}
+                    : `${event.description.substring(0, 100)}...`}
                   {event.description.length > 100 && (
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
+                        e.stopPropagation(); 
                         toggleDescription(event.id);
                       }}
                       style={{
@@ -189,7 +244,7 @@ const Profile = () => {
             <div
               key={event.id}
               className="event-card"
-              onClick={() => handleEventClick(event.id)}
+              onClick={() => handleEventClick(event.id)} 
               style={{ cursor: 'pointer' }}
             >
               <div className="event-info">
@@ -199,11 +254,11 @@ const Profile = () => {
                 <p>
                   {expandedDescriptions[event.id]
                     ? event.description
-                    : truncateText(event.description, 100)}
+                    : `${event.description.substring(0, 100)}...`}
                   {event.description.length > 100 && (
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
+                        e.stopPropagation(); 
                         toggleDescription(event.id);
                       }}
                       style={{
