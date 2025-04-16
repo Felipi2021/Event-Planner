@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { useNavigate } from 'react-router-dom'; 
 import '../styles/EventCard.scss';
 
 const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveAttend }) => {
   const [isAttending, setIsAttending] = useState(initialIsAttending);
   const [attendeesCount, setAttendeesCount] = useState(event.attendees_count);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     setIsAttending(initialIsAttending);
@@ -21,6 +23,10 @@ const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveA
       setIsAttending(true);
       setAttendeesCount((prev) => prev + 1);
     }
+  };
+
+  const handleNavigateToDetails = () => {
+    navigate(`/events/${event.id}`); 
   };
 
   const handleShowModal = () => {
@@ -44,7 +50,7 @@ const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveA
   );
 
   return (
-    <div className="event-card">
+    <div className="event-card" onClick={handleNavigateToDetails} style={{ cursor: 'pointer' }}>
       <div className="event-card__image">
         {event.image && <img src={`http://localhost:5001/uploads/${event.image}`} alt={event.title} />}
       </div>

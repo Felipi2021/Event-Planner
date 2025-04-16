@@ -9,6 +9,8 @@ const EventDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showFullDescription, setShowFullDescription] = useState(false);
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState('');
 
     useEffect(() => {
         const fetchEventDetails = async () => {
@@ -23,8 +25,47 @@ const EventDetails = () => {
             }
         };
 
+        const fetchComments = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5001/api/events/${id}/comments`);
+                setComments(response.data);
+            } catch (err) {
+                console.error('Error fetching comments:', err);
+            }
+        };
+
         fetchEventDetails();
+        fetchComments();
     }, [id]);
+
+    const handleCommentSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('You need to log in to comment.');
+                return;
+            }
+
+            const response = await axios.post(
+                `http://localhost:5001/api/events/${id}/comments`,
+                { text: newComment },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setComments((prevComments) => [
+                ...prevComments,
+                {
+                    ...response.data,
+                    userAvatar: response.data.userAvatar || 'default-avatar.png',
+                },
+            ]);
+            setNewComment('');
+        } catch (err) {
+            console.error('Error submitting comment:', err);
+            alert('Failed to submit comment. Please try again.');
+        }
+    };
 
     if (loading) {
         return <p className="loading-text">Loading event details...</p>;
@@ -77,6 +118,39 @@ const EventDetails = () => {
                         </button>
                     )}
                 </p>
+            </div>
+            <div className="comments-section">
+                <h3>Comments</h3>
+
+                <form className="comment-form" onSubmit={handleCommentSubmit}>
+                    <img
+                        src={`http://localhost:5001/uploads/${localStorage.getItem('profileImage') || 'default-avatar.png'}`}
+                        alt="Your Profile"
+                        className="comment-profile-image"
+                    />
+                    <textarea
+                        placeholder="Add your comment..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                    ></textarea>
+                    <button type="submit">→</button>
+                </form>
+                <div className="comments-list">
+                    {comments.map((comment) => (
+                        <div className="comment-card" key={comment.id}>
+                            <img
+                                src={`http://localhost:5001/uploads/${encodeURIComponent(comment.userAvatar)}`}
+                                alt={`${comment.username}'s avatar`}
+                                className="comment-card-image"
+                            />
+                            <div className="comment-card-content">
+                                <p><strong>{comment.username}:</strong></p>
+                                <p className="comment-text">{comment.text}</p>
+                                <p className="comment-date">{new Date(comment.created_at).toLocaleString()}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );

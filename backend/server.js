@@ -13,7 +13,6 @@ const PORT = 5001;
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 app.use('/api/users', userRoutes);
 app.use('/api/events', eventRoutes);
 

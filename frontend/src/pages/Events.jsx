@@ -150,7 +150,7 @@ const handleRemoveAttend = async (eventId) => {
             value={sortCriteria}
           >
             <option value="name">Name</option>
-            <option value="date">Date of Publish</option>
+            <option value="date">Date of Event</option>
             <option value="capacity">Capacity</option>
           </select>
           <label>Order:</label>

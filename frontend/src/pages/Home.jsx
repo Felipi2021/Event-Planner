@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; 
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/home.scss';
@@ -14,6 +15,7 @@ const Home = () => {
   ]);
   const [weather, setWeather] = useState(null);
   const [city, setCity] = useState('Warsaw');
+  const navigate = useNavigate(); 
   const [searchCity, setSearchCity] = useState('');
 
   useEffect(() => {
@@ -85,6 +87,10 @@ const Home = () => {
     }
   };
 
+  const handleEventClick = (eventId) => {
+    navigate(`/events/${eventId}`); 
+  };
+
   return (
     <div>
       <div className="welcome-section">
@@ -92,10 +98,15 @@ const Home = () => {
         <p>Discover events, stay updated, and plan your next adventure!</p>
       </div>
       <div className="home-container">
-        <div className="events-section">
+      <div className="events-section">
           <h2>Latest Events</h2>
           {latestEvents.map((event) => (
-            <div key={event.id} className="event-card">
+            <div
+              key={event.id}
+              className="event-card"
+              onClick={() => handleEventClick(event.id)} 
+              style={{ cursor: 'pointer' }}
+            >
               <div className="event-details">
                 <h3>{event.title}</h3>
                 <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
@@ -104,7 +115,10 @@ const Home = () => {
               </div>
               <span
                 className={`star-icon ${favorites.includes(event.id) ? 'favorite' : ''}`}
-                onClick={() => handleFavorite(event.id)}
+                onClick={(e) => {
+                  e.stopPropagation(); 
+                  handleFavorite(event.id);
+                }}
               >
                 ★
               </span>

@@ -29,21 +29,25 @@ const Login = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!emailValid) {
-      toast.error('Please fix the errors before submitting.');
-      return;
+        toast.error('Please fix the errors before submitting.');
+        return;
     }
     try {
-      const response = await axios.post('http://localhost:5001/api/users/login', { email, password });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId', response.data.userId);
-      toast.success('Logged in successfully!');
-      onLogin(); 
-      navigate('/'); 
+        const response = await axios.post('http://localhost:5001/api/users/login', { email, password });
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userId', response.data.userId);
+
+        const userDetails = await axios.get(`http://localhost:5001/api/users/${response.data.userId}`);
+        localStorage.setItem('profileImage', userDetails.data.image || 'default-avatar.png');
+
+        toast.success('Logged in successfully!');
+        onLogin();
+        navigate('/');
     } catch (err) {
-      console.error('Login error:', err);
-      toast.error('Login failed. Check your credentials.');
+        console.error('Login error:', err);
+        toast.error('Login failed. Check your credentials.');
     }
-  };
+};
 
   return (
     <form onSubmit={handleSubmit} className="form-page">
