@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/form.scss';
@@ -70,13 +70,16 @@ const Register = () => {
       return;
     }
 
+    if (!image) {
+      toast.error('Profile image is required.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('username', username);
     formData.append('email', email);
     formData.append('password', password);
-    if (image) {
-      formData.append('image', image);
-    }
+    formData.append('image', image);
 
     try {
       const response = await axios.post('http://localhost:5001/api/users/register', formData, {
@@ -136,9 +139,15 @@ const Register = () => {
       </div>
       <div className="form__group">
         <label>Profile Image:</label>
-        <input type="file" onChange={handleImageChange} />
+        <input type="file" onChange={handleImageChange} required />
       </div>
       {serverError && <p className="error-message">{serverError}</p>}
+      <p style={{ textAlign: 'center', marginBottom: '1rem' }}>
+        Already have an account?{' '}
+        <Link to="/login" style={{ color: '#007bff', textDecoration: 'underline' }}>
+          Login
+        </Link>
+      </p>
       <button type="submit">Register</button>
     </form>
   );

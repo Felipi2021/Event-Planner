@@ -1,4 +1,29 @@
-.event-details-container {
+@media (max-width: 768px) {
+    .event-details-container {
+      padding: 1rem;
+    }
+  
+    .event-header {
+      text-align: center;
+    }
+  
+    .event-content {
+      flex-direction: column;
+    }
+  
+    .event-image-container {
+      margin-bottom: 1rem;
+    }
+  
+    .event-info {
+      padding: 1rem;
+    }
+  
+    .comments-section {
+      padding: 1rem;
+    }
+  }
+  .event-details-container {
     width: 100%;
     margin: 0 auto;
     padding: 2rem;

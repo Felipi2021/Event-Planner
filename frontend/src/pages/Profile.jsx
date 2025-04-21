@@ -7,8 +7,8 @@ import { useParams } from 'react-router-dom';
 import '../styles/profile.scss';
 
 const Profile = () => {
-  const { userId } = useParams(); 
-  const loggedInUserId = localStorage.getItem('userId'); 
+  const { userId } = useParams();
+  const loggedInUserId = localStorage.getItem('userId');
   const [userInfo, setUserInfo] = useState(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
   const [createdEvents, setCreatedEvents] = useState([]);
@@ -46,7 +46,7 @@ const Profile = () => {
         toast.error('Failed to load profile data.');
       }
     };
-  
+
     fetchProfileData();
   }, [userId]);
 
@@ -57,14 +57,14 @@ const Profile = () => {
         toast.error('You need to log in to rate.');
         return;
       }
-  
+
       await axios.post(
         'http://localhost:5001/api/users/rate',
         { ratedId: userId, rating: newRating },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
-      setUserRating(newRating); 
+
+      setUserRating(newRating);
       toast.success('Rating submitted successfully!');
     } catch (err) {
       console.error('Error submitting rating:', err);
@@ -96,11 +96,11 @@ const Profile = () => {
   const toggleDescription = (eventId) => {
     setExpandedDescriptions((prevState) => ({
       ...prevState,
-      [eventId]: !prevState[eventId], 
+      [eventId]: !prevState[eventId],
     }));
   };
   const handleEventClick = (eventId) => {
-    navigate(`/events/${eventId}`); 
+    navigate(`/events/${eventId}`);
   };
   return (
     <div className="page-container">
@@ -122,13 +122,13 @@ const Profile = () => {
                   <strong>Created:</strong>{' '}
                   {userInfo.created_at ? new Date(userInfo.created_at).toLocaleDateString() : 'N/A'}
                 </p>
-                <p><strong>Average Rating:</strong> {averageRating ? averageRating.toFixed(1) : 'No ratings yet'} / 5</p>              
+                <p><strong>Average Rating:</strong> {averageRating ? averageRating.toFixed(1) : 'No ratings yet'} / 5</p>
               </div>
-              
+
             </div>
             <div className="description">
               <h3>Description</h3>
-              {userId === loggedInUserId ? ( 
+              {userId === loggedInUserId ? (
                 isEditingDescription ? (
                   <div className="description-edit">
                     <textarea
@@ -138,7 +138,12 @@ const Profile = () => {
                       rows="3"
                     />
                     <div className="button-group">
-                      <button onClick={handleDescriptionSubmit}>Save</button>
+                      <button
+                        className="save-button"
+                        onClick={handleDescriptionSubmit}
+                        >
+                          Save
+                        </button>
                       <button
                         className="cancel-button"
                         onClick={() => setIsEditingDescription(false)}
@@ -159,7 +164,7 @@ const Profile = () => {
                   </>
                 )
               ) : (
-                <p>{userInfo.description || 'No description added.'}</p> 
+                <p>{userInfo.description || 'No description added.'}</p>
               )}
             </div>
             <div className="rating-section">
@@ -209,7 +214,7 @@ const Profile = () => {
                   {event.description.length > 100 && (
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); 
+                        e.stopPropagation();
                         toggleDescription(event.id);
                       }}
                       style={{
@@ -244,7 +249,7 @@ const Profile = () => {
             <div
               key={event.id}
               className="event-card"
-              onClick={() => handleEventClick(event.id)} 
+              onClick={() => handleEventClick(event.id)}
               style={{ cursor: 'pointer' }}
             >
               <div className="event-info">
@@ -258,7 +263,7 @@ const Profile = () => {
                   {event.description.length > 100 && (
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); 
+                        e.stopPropagation();
                         toggleDescription(event.id);
                       }}
                       style={{

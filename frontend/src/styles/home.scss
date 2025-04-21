@@ -1,4 +1,26 @@
+@media (max-width: 768px) {
+  .home-container {
+    flex-direction: column;
+    padding: 1rem;
+  }
 
+  .welcome-section {
+    padding: 1rem;
+  }
+
+  .events-section {
+    margin-bottom: 1rem;
+  }
+
+  .event-card {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .event-card .event-details {
+    text-align: center;
+  }
+}
 .events-section {
     flex: 0 0 70%; 
     background: #ffffff;

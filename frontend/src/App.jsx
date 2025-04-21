@@ -12,7 +12,7 @@ import EventDetails from './pages/EventDetails';
 import Navbar from './components/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './styles/global.scss';
+import './styles/App.scss';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,7 +30,6 @@ function App() {
       }
     }
   };
-
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
@@ -49,15 +48,15 @@ function App() {
     <Router>
       <Navbar isLoggedIn={isLoggedIn} profileImage={profileImage} />
       <Routes>
-  <Route path="/" element={<Home />} />
-  <Route path="/profile/:userId" element={<Profile />} />
-  <Route path="/login" element={<Login onLogin={handleLogin} />} />
-  <Route path="/register" element={<Register />} />
-  <Route path="/events" element={isLoggedIn ? <Events /> : <Navigate to="/login" />} />
-  <Route path="/events/:id" element={isLoggedIn ? <EventDetails /> : <Navigate to="/login" />} /> 
-  <Route path="/CreateEvent" element={isLoggedIn ? <CreateEvent /> : <Navigate to="/login" />} />
-  <Route path="/profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
-</Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/profile/:userId" element={<Profile />} />
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/events" element={isLoggedIn ? <Events /> : <Navigate to="/login" />} />
+        <Route path="/events/:id" element={isLoggedIn ? <EventDetails /> : <Navigate to="/login" />} /> 
+        <Route path="/CreateEvent" element={isLoggedIn ? <CreateEvent /> : <Navigate to="/login" />} />
+        <Route path="/profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
+      </Routes>
       <ToastContainer
         position="top-right"
         autoClose={3000}
