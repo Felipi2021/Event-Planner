@@ -63,6 +63,18 @@ const register = async (req, res) => {
     res.status(500).send({ message: 'Internal server error', error: err });
   }
 };
+const getCommentCount = (req, res) => {
+  const userId = req.params.userId;
+
+  const query = 'SELECT COUNT(*) AS count FROM comments WHERE user_id = ?';
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching comment count:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+    res.send({ count: results[0].count });
+  });
+};
 
 const updateDescription = (req, res) => {
   const userId = req.params.userId;
@@ -181,4 +193,4 @@ const getAttendanceStatus = (req, res) => {
   });
 };
 
-module.exports = { addRating, getAverageRating, updateDescription, register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus };
+module.exports = { getCommentCount, addRating, getAverageRating, updateDescription, register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus };

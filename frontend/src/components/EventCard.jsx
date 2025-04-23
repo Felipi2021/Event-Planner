@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import '../styles/EventCard.scss';
 
 const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveAttend }) => {
   const [isAttending, setIsAttending] = useState(initialIsAttending);
   const [attendeesCount, setAttendeesCount] = useState(event.attendees_count);
   const [showModal, setShowModal] = useState(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsAttending(initialIsAttending);
   }, [initialIsAttending]);
 
-  const handleAttendClick = () => {
+  const handleAttendClick = (e) => {
+    e.stopPropagation(); 
     if (isAttending) {
       onRemoveAttend(event.id);
       setIsAttending(false);
@@ -26,10 +27,11 @@ const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveA
   };
 
   const handleNavigateToDetails = () => {
-    navigate(`/events/${event.id}`); 
+    navigate(`/events/${event.id}`);
   };
 
-  const handleShowModal = () => {
+  const handleShowModal = (e) => {
+    e.stopPropagation(); 
     setShowModal(true);
   };
 

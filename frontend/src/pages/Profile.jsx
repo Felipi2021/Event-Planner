@@ -19,6 +19,7 @@ const Profile = () => {
   const [showFavoriteEvents, setShowFavoriteEvents] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [userRating, setUserRating] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,6 +42,10 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFavoriteEvents(favoriteEventsResponse.data);
+
+        // Fetch comment count
+        const commentCountResponse = await axios.get(`http://localhost:5001/api/users/${userId}/comments/count`);
+        setCommentCount(commentCountResponse.data.count);
       } catch (err) {
         console.error('Error fetching profile data:', err);
         toast.error('Failed to load profile data.');
@@ -122,6 +127,7 @@ const Profile = () => {
                   <strong>Created:</strong>{' '}
                   {userInfo.created_at ? new Date(userInfo.created_at).toLocaleDateString() : 'N/A'}
                 </p>
+                <p><strong>Comments Posted:</strong> {commentCount}</p> 
                 <p><strong>Average Rating:</strong> {averageRating ? averageRating.toFixed(1) : 'No ratings yet'} / 5</p>
               </div>
 

@@ -7,31 +7,32 @@ import '../styles/events.scss';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
-  const [filteredEvents, setFilteredEvents] = useState([]); 
+  const [filteredEvents, setFilteredEvents] = useState([]);
   const [attendanceStatus, setAttendanceStatus] = useState({});
-  const [sortCriteria, setSortCriteria] = useState('name'); 
+  const [sortCriteria, setSortCriteria] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          toast.error('You need to log in.');
-          return;
-        }
-
-        const response = await axios.get('http://localhost:5001/api/events', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setEvents(response.data);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-        toast.error('Failed to fetch events.');
+  const fetchEvents = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('You need to log in.');
+        return;
       }
-    };
 
+      const response = await axios.get('http://localhost:5001/api/events', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEvents(response.data);
+      setFilteredEvents(response.data); 
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      toast.error('Failed to fetch events.');
+    }
+  };
+
+  useEffect(() => {
     fetchEvents();
   }, []);
 
@@ -81,11 +82,6 @@ const Events = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (response.status !== 200) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to mark attendance.');
-      }
-
       toast.success('Attendance marked successfully!');
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
       setEvents((prevEvents) =>
@@ -97,41 +93,39 @@ const Events = () => {
       );
     } catch (error) {
       console.error('Error marking attendance:', error);
-      toast.error(error.message);
+      toast.error('Failed to mark attendance.');
     }
-};
+  };
 
-const handleRemoveAttend = async (eventId) => {
-  try {
+  const handleRemoveAttend = async (eventId) => {
+    try {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       if (!token || !userId) {
-          toast.error('You need to log in to remove attendance.');
-          return;
+        toast.error('You need to log in to remove attendance.');
+        return;
       }
 
-      const response = await axios.delete(
-          `http://localhost:5001/api/events/${eventId}/attend`,
-          {
-              headers: { Authorization: `Bearer ${token}` },
-              data: { userId },
-          }
-      );
+      await axios.delete(`http://localhost:5001/api/events/${eventId}/attend`, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { userId },
+      });
 
-      toast.info('Attendance removed successfully!'); 
+      toast.info('Attendance removed successfully!');
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
       setEvents((prevEvents) =>
-          prevEvents.map((event) =>
-              event.id === eventId
-                  ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) }
-                  : event
-          )
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) }
+            : event
+        )
       );
-  } catch (err) {
+    } catch (err) {
       console.error('Error removing attendance:', err);
-      toast.error('Failed to remove attendance. Please try again.');
-  }
-};
+      toast.error('Failed to remove attendance.');
+    }
+  };
+
   return (
     <div className="page-container">
       <h2>Available Events</h2>
