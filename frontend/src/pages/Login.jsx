@@ -53,8 +53,9 @@ const Login = ({ onLogin }) => {
     <form onSubmit={handleSubmit} className="form-page">
       <h2>Login</h2>
       <div className="form__group">
-        <label>Email:</label>
+        <label htmlFor="email">Email:</label>
         <input
+          id="email"
           type="email"
           value={email}
           onChange={handleEmailChange}
@@ -64,8 +65,9 @@ const Login = ({ onLogin }) => {
         {!emailValid && <p className="error-message">{emailMessage}</p>}
       </div>
       <div className="form__group">
-        <label>Password:</label>
+        <label htmlFor="password">Password:</label>
         <input
+          id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

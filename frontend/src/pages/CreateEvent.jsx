@@ -59,8 +59,9 @@ const CreateEvent = () => {
         <form onSubmit={handleSubmit} className="form-page">
           <h2>Create Event</h2>
           <div className="form__group">
-            <label>Title:</label>
+            <label htmlFor="title">Title:</label>
             <input
+              id="title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -68,8 +69,9 @@ const CreateEvent = () => {
             />
           </div>
           <div className="form__group">
-            <label>Description:</label>
+            <label htmlFor="description">Description:</label>
             <textarea
+              id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows="4"
@@ -77,8 +79,9 @@ const CreateEvent = () => {
             />
           </div>
           <div className="form__group">
-            <label>Date:</label>
+            <label htmlFor="date">Date:</label>
             <input
+              id="date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
@@ -86,8 +89,9 @@ const CreateEvent = () => {
             />
           </div>
           <div className="form__group">
-            <label>Location:</label>
+            <label htmlFor="location">Location:</label>
             <input
+              id="location"
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
@@ -95,8 +99,9 @@ const CreateEvent = () => {
             />
           </div>
           <div className="form__group">
-            <label>Capacity:</label>
+            <label htmlFor="capacity">Capacity:</label>
             <input
+              id="capacity"
               type="number"
               value={capacity}
               onChange={(e) => setCapacity(e.target.value)}
@@ -104,8 +109,9 @@ const CreateEvent = () => {
             />
           </div>
           <div className="form__group">
-            <label>Event Image:</label>
+            <label htmlFor="eventImage">Event Image:</label>
             <input
+              id="eventImage"
               type="file"
               accept="image/*"
               onChange={handleImageChange}

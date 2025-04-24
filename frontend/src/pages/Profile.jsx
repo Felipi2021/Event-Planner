@@ -26,26 +26,34 @@ const Profile = () => {
     const fetchProfileData = async () => {
       try {
         const token = localStorage.getItem('token');
-
         const userResponse = await axios.get(`http://localhost:5001/api/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUserInfo(userResponse.data);
+
+        if (userResponse?.data) {
+          setUserInfo(userResponse.data);
+        } else {
+          throw new Error('No user data found');
+        }
 
         const ratingResponse = await axios.get(`http://localhost:5001/api/users/${userId}/average-rating`);
-        setAverageRating(ratingResponse.data.averageRating);
+        setAverageRating(ratingResponse.data?.averageRating || 0);
 
         const createdEventsResponse = await axios.get(`http://localhost:5001/api/events?created_by=${userId}`);
-        setCreatedEvents(createdEventsResponse.data);
+        setCreatedEvents(createdEventsResponse.data || []);
 
         const favoriteEventsResponse = await axios.get(`http://localhost:5001/api/users/${userId}/favorites`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setFavoriteEvents(favoriteEventsResponse.data);
 
-        // Fetch comment count
+        if (favoriteEventsResponse?.data) {
+          setFavoriteEvents(favoriteEventsResponse.data);
+        } else {
+          setFavoriteEvents([]);
+        }
+
         const commentCountResponse = await axios.get(`http://localhost:5001/api/users/${userId}/comments/count`);
-        setCommentCount(commentCountResponse.data.count);
+        setCommentCount(commentCountResponse.data?.count || 0);
       } catch (err) {
         console.error('Error fetching profile data:', err);
         toast.error('Failed to load profile data.');

@@ -29,14 +29,20 @@ const Home = () => {
       }
     };
 
+    const handleWeatherResponse = (response) => {
+      if (process.env.NODE_ENV !== 'test') {
+        console.log('Weather API response:', response);
+      }
+      setWeather(response.data);
+    };
+
     const fetchWeather = async () => {
       try {
         const apiKey = '2c3dd76944303cadaf7dacfcde139d15';
         const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
         );
-        console.log('Weather API response:', response.data);
-        setWeather(response.data);
+        handleWeatherResponse(response);
       } catch (err) {
         console.error('Error fetching weather data:', err);
         setWeather(null);

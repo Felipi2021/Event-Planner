@@ -43,9 +43,10 @@ const EventDetails = () => {
         const fetchComments = async () => {
             try {
                 const response = await axios.get(`http://localhost:5001/api/events/${id}/comments`);
-                setComments(response.data);
+                setComments(response.data || []); 
             } catch (err) {
                 console.error('Error fetching comments:', err);
+                toast.error('Failed to load comments.');
             }
         };
 

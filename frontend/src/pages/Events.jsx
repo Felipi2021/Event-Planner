@@ -5,8 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import EventCard from '../components/EventCard';
 import '../styles/events.scss';
 
-const Events = () => {
-  const [events, setEvents] = useState([]);
+const Events = ({ events }) => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [attendanceStatus, setAttendanceStatus] = useState({});
   const [sortCriteria, setSortCriteria] = useState('name');
@@ -24,7 +23,6 @@ const Events = () => {
       const response = await axios.get('http://localhost:5001/api/events', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setEvents(response.data);
       setFilteredEvents(response.data); 
     } catch (error) {
       console.error('Error fetching events:', error);

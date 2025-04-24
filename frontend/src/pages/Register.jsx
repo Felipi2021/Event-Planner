@@ -104,12 +104,19 @@ const Register = () => {
     <form onSubmit={handleSubmit} className="form-page">
       <h2>Register</h2>
       <div className="form__group">
-        <label>Username:</label>
-        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+        <label htmlFor="username">Username:</label>
+        <input
+          id="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
       </div>
       <div className="form__group">
-        <label>Email:</label>
+        <label htmlFor="email">Email:</label>
         <input
+          id="email"
           type="email"
           value={email}
           onChange={handleEmailChange}
@@ -119,8 +126,9 @@ const Register = () => {
         {!emailValid && <p className="error-message">{emailMessage}</p>}
       </div>
       <div className="form__group">
-        <label>Password:</label>
+        <label htmlFor="password">Password:</label>
         <input
+          id="password"
           type="password"
           value={password}
           onChange={handlePasswordChange}
@@ -138,8 +146,13 @@ const Register = () => {
         )}
       </div>
       <div className="form__group">
-        <label>Profile Image:</label>
-        <input type="file" onChange={handleImageChange} required />
+        <label htmlFor="profileImage">Profile Image:</label>
+        <input
+          id="profileImage"
+          type="file"
+          onChange={handleImageChange}
+          required
+        />
       </div>
       {serverError && <p className="error-message">{serverError}</p>}
       <p style={{ textAlign: 'center', marginBottom: '1rem' }}>
