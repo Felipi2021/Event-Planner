@@ -28,8 +28,7 @@ const EventDetails = () => {
                 const userId = localStorage.getItem('userId');
                 if (token && userId) {
                     const attendanceResponse = await axios.get(
-                        `http://localhost:5001/api/users/${userId}/attendance`,
-                        { headers: { Authorization: `Bearer ${token}` } }
+                        `http://localhost:5001/api/users/${userId}/attendance`
                     );
                     setIsAttending(attendanceResponse.data[id] || false);
                 }
@@ -73,7 +72,7 @@ const EventDetails = () => {
                 setAttendeesCount((prev) => Math.max(prev - 1, 0));
                 toast.info('You are no longer attending this event.');
             } else {
-                const response = await axios.post(
+                await axios.post(
                     `http://localhost:5001/api/events/${id}/attend`,
                     { userId },
                     { headers: { Authorization: `Bearer ${token}` } }
@@ -83,8 +82,8 @@ const EventDetails = () => {
                 toast.success('You are now attending this event.');
             }
         } catch (err) {
-            console.error('Error toggling attendance:', err);
-            toast.error('Failed to update attendance status.');
+            console.error('Error updating attendance:', err);
+            toast.error('Failed to update attendance. Please try again.');
         }
     };
 
