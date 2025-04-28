@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-// Mock EventDetails component entirely
+
 jest.mock('../EventDetails', () => () => (
   <div data-testid="mocked-event-details">
     <h2>Test Event</h2>
@@ -20,10 +20,10 @@ jest.mock('../EventDetails', () => () => (
   </div>
 ));
 
-// Import after mocking
+
 import EventDetails from '../EventDetails';
 
-// Mock other dependencies
+
 jest.mock('react-router-dom', () => ({
   useParams: () => ({ id: '123' }),
   useNavigate: () => jest.fn(),
@@ -40,7 +40,7 @@ jest.mock('react-toastify', () => ({
   }
 }));
 
-// Setup tests
+
 describe('EventDetails Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();

@@ -6,7 +6,7 @@ import Profile from '../Profile';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-// Mock required modules
+
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -23,7 +23,7 @@ jest.mock('react-toastify', () => ({
   }
 }));
 
-// Mock react-rating-stars-component
+
 jest.mock('react-rating-stars-component', () => {
   return function MockReactStars(props) {
     return (
@@ -34,7 +34,7 @@ jest.mock('react-rating-stars-component', () => {
   };
 });
 
-// Mock localStorage
+
 const mockLocalStorage = (() => {
   let store = {
     'token': 'fake-token',
@@ -104,7 +104,7 @@ describe('Profile Component', () => {
     jest.clearAllMocks();
     jest.spyOn(console, 'error').mockImplementation(() => {});
     
-    // Set up default API responses
+    
     axios.get.mockImplementation((url) => {
       if (url === 'http://localhost:5001/api/users/123') {
         return Promise.resolve({ data: mockUserInfo });
@@ -144,13 +144,13 @@ describe('Profile Component', () => {
     expect(screen.getByText(/Average Rating:/)).toBeInTheDocument();
     expect(screen.getByText(/4.5/)).toBeInTheDocument();
     
-    // Check for comments - look for separate elements
+    
     expect(screen.getByText(/Comments Posted:/)).toBeInTheDocument();
     expect(screen.getByText('15')).toBeInTheDocument();
   });
 
   test('displays loading or error state when user data cannot be loaded', async () => {
-    // Mock API error
+    
     axios.get.mockImplementation(() => Promise.reject(new Error('Failed to load user')));
     
     render(
@@ -159,14 +159,14 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
     
-    // Should show error message
+    
     await waitFor(() => {
       expect(screen.getByText('Cannot load profile data...')).toBeInTheDocument();
     });
   });
 
   test('displays default state when user data has empty values', async () => {
-    // Mock user with no description and null ratings
+    
     axios.get.mockImplementation((url) => {
       if (url === 'http://localhost:5001/api/users/123') {
         return Promise.resolve({ 
@@ -183,7 +183,7 @@ describe('Profile Component', () => {
       else if (url.includes('api/users/123/comments/count')) {
         return Promise.resolve({ data: { count: 0 } });
       }
-      // Return same mock data for other endpoints
+      
       else if (url.includes('api/events?created_by=123')) {
         return Promise.resolve({ data: mockCreatedEvents });
       }
@@ -203,7 +203,7 @@ describe('Profile Component', () => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Check defaults for empty values
+    
     expect(screen.getByText('No description added.')).toBeInTheDocument();
     expect(screen.getByText('Add Description +')).toBeInTheDocument();
     expect(screen.getByText('N/A')).toBeInTheDocument();
@@ -217,28 +217,28 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Click Edit Description button (only visible on own profile)
+    
     const editButton = screen.getByText('Edit Description');
     fireEvent.click(editButton);
     
-    // Check if textarea appears
+    
     const textarea = screen.getByPlaceholderText('Add a description about yourself...');
     expect(textarea).toBeInTheDocument();
     expect(textarea.value).toBe('This is a test user description');
     
-    // Update description
+    
     fireEvent.change(textarea, { target: { value: 'Updated description' } });
     
-    // Save the changes
+    
     const saveButton = screen.getByText('Save');
     fireEvent.click(saveButton);
     
-    // Check if API was called with correct data
+    
     await waitFor(() => {
       expect(axios.put).toHaveBeenCalledWith(
         'http://localhost:5001/api/users/123/description',
@@ -256,31 +256,31 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Click Edit Description button
+    
     const editButton = screen.getByText('Edit Description');
     fireEvent.click(editButton);
     
-    // Get textarea and change value
+    
     const textarea = screen.getByPlaceholderText('Add a description about yourself...');
     fireEvent.change(textarea, { target: { value: 'This will be discarded' } });
     
-    // Click Cancel button
+    
     const cancelButton = screen.getByText('Cancel');
     fireEvent.click(cancelButton);
     
-    // Check that we're back to display mode with the original text
+    
     expect(screen.queryByPlaceholderText('Add a description about yourself...')).not.toBeInTheDocument();
     expect(screen.getByText('This is a test user description')).toBeInTheDocument();
-    expect(axios.put).not.toHaveBeenCalled(); // API should not have been called
+    expect(axios.put).not.toHaveBeenCalled(); 
   });
 
   test('handles error when updating description', async () => {
-    // Mock API error
+    
     axios.put.mockRejectedValueOnce(new Error('Failed to update description'));
     
     render(
@@ -289,24 +289,24 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Click Edit Description button
+    
     const editButton = screen.getByText('Edit Description');
     fireEvent.click(editButton);
     
-    // Update description
+    
     const textarea = screen.getByPlaceholderText('Add a description about yourself...');
     fireEvent.change(textarea, { target: { value: 'Updated description' } });
     
-    // Save the changes
+    
     const saveButton = screen.getByText('Save');
     fireEvent.click(saveButton);
     
-    // Verify error message
+    
     await waitFor(() => {
       expect(console.error).toHaveBeenCalledWith('Error updating description:', expect.any(Error));
       expect(toast.error).toHaveBeenCalledWith('Failed to update description. Please try again.');
@@ -314,9 +314,9 @@ describe('Profile Component', () => {
   });
 
   test('allows users to rate other profiles', async () => {
-    // Mock different user ID for viewing someone else's profile
+    
     jest.spyOn(window.localStorage, 'getItem').mockImplementation((key) => {
-      if (key === 'userId') return '456'; // Different from the profile being viewed
+      if (key === 'userId') return '456'; 
       if (key === 'token') return 'fake-token';
       return null;
     });
@@ -327,16 +327,16 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Find and click rating component
+    
     const ratingComponent = screen.getByTestId('rating-stars');
     fireEvent.click(ratingComponent);
     
-    // Check if API was called correctly
+    
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(
         'http://localhost:5001/api/users/rate',
@@ -348,12 +348,12 @@ describe('Profile Component', () => {
   });
 
   test('handles error when submitting a rating', async () => {
-    // Mock API error
+    
     axios.post.mockRejectedValueOnce(new Error('Failed to submit rating'));
     
-    // Mock different user ID for viewing someone else's profile
+    
     jest.spyOn(window.localStorage, 'getItem').mockImplementation((key) => {
-      if (key === 'userId') return '456'; // Different from the profile being viewed
+      if (key === 'userId') return '456'; 
       if (key === 'token') return 'fake-token';
       return null;
     });
@@ -364,16 +364,16 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Find and click rating component
+    
     const ratingComponent = screen.getByTestId('rating-stars');
     fireEvent.click(ratingComponent);
     
-    // Verify error message
+    
     await waitFor(() => {
       expect(console.error).toHaveBeenCalledWith('Error submitting rating:', expect.any(Error));
       expect(toast.error).toHaveBeenCalledWith('Failed to submit rating. Please try again.');
@@ -387,22 +387,22 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Check if the rating stars are present, which means it's not showing the prevention message
-    // For own profile, the component shows the rating stars (contradicting test expectation)
+    
+    
     const ratingStars = screen.getByTestId('rating-stars');
     expect(ratingStars).toBeInTheDocument();
   });
 
   test('prevents rating when not logged in', async () => {
-    // Mock user viewing someone else's profile but not logged in
+    
     jest.spyOn(window.localStorage, 'getItem').mockImplementation((key) => {
-      if (key === 'userId') return '456'; // Different from the profile being viewed
-      if (key === 'token') return null; // No token (not logged in)
+      if (key === 'userId') return '456'; 
+      if (key === 'token') return null; 
       return null;
     });
     
@@ -412,16 +412,16 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Find and click rating component
+    
     const ratingComponent = screen.getByTestId('rating-stars');
     fireEvent.click(ratingComponent);
     
-    // Verify error message
+    
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('You need to log in to rate.');
       expect(axios.post).not.toHaveBeenCalled();
@@ -435,16 +435,16 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Toggle created events section
+    
     const eventsToggle = screen.getByText(/Events Created/);
     fireEvent.click(eventsToggle);
     
-    // Check if events are displayed
+    
     await waitFor(() => {
       expect(screen.getByText('Event 1')).toBeInTheDocument();
       expect(screen.getByText('Event 2')).toBeInTheDocument();
@@ -458,23 +458,23 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Toggle favorite events section
+    
     const favoritesToggle = screen.getByText(/Events Marked as Favorite/);
     fireEvent.click(favoritesToggle);
     
-    // Check if favorite events are displayed
+    
     await waitFor(() => {
       expect(screen.getByText('Favorite Event 1')).toBeInTheDocument();
     });
   });
 
   test('displays message when no events or favorites are available', async () => {
-    // Mock empty events lists
+    
     axios.get.mockImplementation((url) => {
       if (url === 'http://localhost:5001/api/users/123') {
         return Promise.resolve({ data: mockUserInfo });
@@ -483,10 +483,10 @@ describe('Profile Component', () => {
         return Promise.resolve({ data: { averageRating: 4.5 } });
       }
       else if (url.includes('api/events?created_by=123')) {
-        return Promise.resolve({ data: [] }); // No created events
+        return Promise.resolve({ data: [] }); 
       }
       else if (url.includes('api/users/123/favorites')) {
-        return Promise.resolve({ data: [] }); // No favorite events
+        return Promise.resolve({ data: [] }); 
       }
       else if (url.includes('api/users/123/comments/count')) {
         return Promise.resolve({ data: { count: 15 } });
@@ -500,25 +500,25 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Toggle created events section
+    
     const eventsToggle = screen.getByText(/Events Created/);
     fireEvent.click(eventsToggle);
     
-    // Should see "You haven't created any events yet" message
+    
     await waitFor(() => {
       expect(screen.getByText("You haven't created any events yet.")).toBeInTheDocument();
     });
     
-    // Toggle favorite events section
+    
     const favoritesToggle = screen.getByText(/Events Marked as Favorite/);
     fireEvent.click(favoritesToggle);
     
-    // Should see message about no favorite events
+    
     await waitFor(() => {
       expect(screen.getByText("You haven't marked any events as favorites yet.")).toBeInTheDocument();
     });
@@ -531,35 +531,35 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Toggle created events section
+    
     const eventsToggle = screen.getByText(/Events Created/);
     fireEvent.click(eventsToggle);
     
-    // Check that events are displayed with truncated descriptions
+    
     await waitFor(() => {
       expect(screen.getByText('Event 1')).toBeInTheDocument();
     });
     
-    // Description should initially be truncated
+    
     const viewMoreButton = screen.getAllByText(/View More/)[0];
     expect(viewMoreButton).toBeInTheDocument();
     
-    // Click View More for the first event
+    
     fireEvent.click(viewMoreButton);
     
-    // Should now show View Less 
+    
     expect(screen.getByText(/View Less/)).toBeInTheDocument();
     
-    // Click View Less
+    
     const viewLessButton = screen.getByText(/View Less/);
     fireEvent.click(viewLessButton);
     
-    // Should be back to View More
+    
     expect(screen.getAllByText(/View More/)[0]).toBeInTheDocument();
   });
 
@@ -570,29 +570,29 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
 
-    // Wait for profile to load
+    
     await waitFor(() => {
       expect(screen.getByText(/testuser/)).toBeInTheDocument();
     });
     
-    // Toggle created events section
+    
     const eventsToggle = screen.getByText(/Events Created/);
     fireEvent.click(eventsToggle);
     
-    // Wait for events to display
+    
     await waitFor(() => {
       expect(screen.getByText('Event 1')).toBeInTheDocument();
     });
     
-    // Click on the first event
+    
     fireEvent.click(screen.getByText('Event 1').closest('.event-card'));
     
-    // Verify navigation was called with the correct event ID
+    
     expect(mockNavigate).toHaveBeenCalledWith('/events/1');
   });
 
   test('handles API errors gracefully', async () => {
-    // Mock API error
+    
     axios.get.mockImplementationOnce(() => Promise.reject(new Error('API error')));
     
     render(
@@ -601,7 +601,7 @@ describe('Profile Component', () => {
       </BrowserRouter>
     );
     
-    // Verify error message is displayed
+    
     await waitFor(() => {
       expect(console.error).toHaveBeenCalledWith('Error fetching profile data:', expect.any(Error));
       expect(toast.error).toHaveBeenCalledWith('Failed to load profile data.');

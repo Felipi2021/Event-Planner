@@ -5,15 +5,15 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import Login from '../Login';
 
-// Mock the react-router-dom
+
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
-// Mock axios
+
 jest.mock('axios');
 
-// Mock react-toastify
+
 jest.mock('react-toastify', () => ({
   toast: {
     success: jest.fn(),
@@ -21,10 +21,10 @@ jest.mock('react-toastify', () => ({
   },
 }));
 
-// Suppress console.error
+
 console.error = jest.fn();
 
-// Mock localStorage
+
 const localStorageMock = (function() {
   let store = {};
   return {
@@ -64,17 +64,17 @@ describe('Login', () => {
     
     const emailInput = screen.getByLabelText(/Email:/i);
     
-    // Test invalid email
+    
     fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
     expect(screen.getByText('Invalid email format')).toBeInTheDocument();
     
-    // Test valid email
+    
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     expect(screen.queryByText('Invalid email format')).not.toBeInTheDocument();
   });
 
   it('handles successful login', async () => {
-    // Mock axios responses
+    
     const mockLoginResponse = {
       data: {
         token: 'test-token',
@@ -93,7 +93,7 @@ describe('Login', () => {
 
     render(<Login onLogin={mockOnLogin} />);
 
-    // Fill in the form
+    
     const emailInput = screen.getByLabelText(/Email:/i);
     const passwordInput = screen.getByLabelText(/Password:/i);
     const submitButton = screen.getByRole('button', { name: /Login/i });
@@ -102,7 +102,7 @@ describe('Login', () => {
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     fireEvent.click(submitButton);
 
-    // Wait for the axios calls and verify
+    
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith('http://localhost:5001/api/users/login', {
         email: 'test@example.com',
@@ -119,12 +119,12 @@ describe('Login', () => {
   });
 
   it('handles login failure', async () => {
-    // Mock axios error response
+    
     axios.post.mockRejectedValueOnce(new Error('Login failed'));
 
     render(<Login onLogin={mockOnLogin} />);
 
-    // Fill in the form
+    
     const emailInput = screen.getByLabelText(/Email:/i);
     const passwordInput = screen.getByLabelText(/Password:/i);
     const submitButton = screen.getByRole('button', { name: /Login/i });
@@ -133,37 +133,37 @@ describe('Login', () => {
     fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
     fireEvent.click(submitButton);
 
-    // Wait for the error and verify
+    
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith('http://localhost:5001/api/users/login', {
         email: 'test@example.com',
         password: 'wrongpassword',
       });
       expect(toast.error).toHaveBeenCalledWith('Login failed. Check your credentials.');
-      expect(mockNavigate).not.toHaveBeenCalled(); // Should not navigate on error
+      expect(mockNavigate).not.toHaveBeenCalled(); 
     });
   });
 
   it('prevents form submission with invalid email', () => {
-    // Simpler test focusing just on the validation aspect
+    
     render(<Login onLogin={mockOnLogin} />);
     
-    // Fill in the form with invalid email
+    
     const emailInput = screen.getByLabelText(/Email:/i);
     const passwordInput = screen.getByLabelText(/Password:/i);
     const submitButton = screen.getByRole('button', { name: /Login/i });
     
-    // Set an invalid email
+    
     fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     
-    // Verify the email validation message appears
+    
     expect(screen.getByText('Invalid email format')).toBeInTheDocument();
     
-    // Click the submit button
+    
     fireEvent.click(submitButton);
     
-    // Just verify the axios post was not called - that's what matters
+    
     expect(axios.post).not.toHaveBeenCalled();
   });
 }); 

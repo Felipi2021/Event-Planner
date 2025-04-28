@@ -3,12 +3,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { useNavigate } from 'react-router-dom';
 import EventCard from '../EventCard';
 
-// Mock the react-router-dom
+
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
-// Mock ReactDOM createPortal
+
 jest.mock('react-dom', () => ({
   ...jest.requireActual('react-dom'),
   createPortal: (node) => node,
@@ -131,18 +131,18 @@ describe('EventCard', () => {
       />
     );
 
-    // Open modal
+    
     const showDescriptionButton = screen.getByRole('button', { name: /Show Description/i });
     fireEvent.click(showDescriptionButton);
 
-    // Verify modal is open
+    
     expect(screen.getByText('Test description')).toBeInTheDocument();
 
-    // Close modal
+    
     const closeButton = screen.getByRole('button', { name: /Close/i });
     fireEvent.click(closeButton);
 
-    // Verify modal is closed
+    
     expect(screen.queryByText('Test description')).not.toBeInTheDocument();
   });
 }); 

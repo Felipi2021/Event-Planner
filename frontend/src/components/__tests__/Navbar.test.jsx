@@ -5,13 +5,13 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '../Navbar';
 
-// Mock react-router-dom
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: jest.fn(),
 }));
 
-// Mock react-toastify
+
 jest.mock('react-toastify', () => ({
   toast: {
     success: jest.fn(),
@@ -19,7 +19,7 @@ jest.mock('react-toastify', () => ({
   },
 }));
 
-// Mock localStorage
+
 const localStorageMock = (function() {
   let store = {};
   return {
@@ -37,7 +37,7 @@ const localStorageMock = (function() {
 })();
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-// Mock window.location.reload
+
 const reloadFn = jest.fn();
 Object.defineProperty(window, 'location', {
   value: {
@@ -135,19 +135,19 @@ describe('Navbar', () => {
   it('closes menu when a link is clicked', () => {
     renderWithRouter(<Navbar isLoggedIn={false} />);
 
-    // First open the menu
+    
     const hamburger = document.querySelector('.hamburger');
     fireEvent.click(hamburger);
 
-    // Menu should be open
+    
     const navbar = document.querySelector('.navbar');
     expect(navbar).toHaveClass('active');
 
-    // Click a link
+    
     const homeLink = screen.getByText('Home');
     fireEvent.click(homeLink);
 
-    // Menu should be closed
+    
     expect(navbar).not.toHaveClass('active');
   });
 }); 

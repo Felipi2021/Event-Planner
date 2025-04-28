@@ -1,9 +1,9 @@
 require('dotenv').config(); 
 const request = require('supertest');
 const express = require('express');
-const userRoutes = require('./routes/userRoutes');
-const eventRoutes = require('./routes/eventRoutes');
-const db = require('./models/db');
+const userRoutes = require('../routes/userRoutes');
+const eventRoutes = require('../routes/eventRoutes');
+const db = require('../models/db');
 
 const app = express();
 app.use(express.json());

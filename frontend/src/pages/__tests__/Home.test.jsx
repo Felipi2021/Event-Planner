@@ -6,16 +6,16 @@ import Home from '../Home';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-// Mock react-router-dom
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => jest.fn()
 }));
 
-// Mock axios
+
 jest.mock('axios');
 
-// Mock react-toastify
+
 jest.mock('react-toastify', () => ({
   toast: {
     success: jest.fn(),
@@ -24,7 +24,7 @@ jest.mock('react-toastify', () => ({
   }
 }));
 
-// Mock localStorage
+
 const mockLocalStorage = (() => {
   let store = {
     'token': 'fake-token',
@@ -85,7 +85,7 @@ describe('Home Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Mock API responses
+    
     axios.get.mockImplementation((url) => {
       if (url === 'http://localhost:5001/api/events') {
         return Promise.resolve({ data: mockEvents });
@@ -106,33 +106,33 @@ describe('Home Component', () => {
       </BrowserRouter>
     );
 
-    // Check welcome section
+    
     expect(screen.getByText('Welcome to Event Planner')).toBeInTheDocument();
     expect(screen.getByText('Discover events, stay updated, and plan your next adventure!')).toBeInTheDocument();
     
-    // Check sections headers
+    
     expect(screen.getByText('Latest Events')).toBeInTheDocument();
     expect(screen.getByText('News Around the World')).toBeInTheDocument();
     expect(screen.getByText('Weather in Warsaw')).toBeInTheDocument();
     
-    // Wait for events to load
+    
     await waitFor(() => {
       expect(screen.getByText('Summer Festival')).toBeInTheDocument();
     });
     
-    // Check if events are displayed
+    
     expect(screen.getByText('Tech Conference')).toBeInTheDocument();
     expect(screen.getByText('Food Fair')).toBeInTheDocument();
     
-    // Check if news are displayed
+    
     expect(screen.getByText('Global Warming Alert')).toBeInTheDocument();
     expect(screen.getByText('Tech Breakthrough')).toBeInTheDocument();
     expect(screen.getByText('Sports Update')).toBeInTheDocument();
     
-    // Check if weather is displayed after loading
+    
     await waitFor(() => {
       expect(screen.getByText('Temperature:')).toBeInTheDocument();
-      // Use a more flexible approach to find the temperature
+      
       expect(screen.getByText(/25.5°C/)).toBeInTheDocument();
     });
     
@@ -145,7 +145,7 @@ describe('Home Component', () => {
   });
 
   test('allows searching for weather by city', async () => {
-    // Mock response for new city search
+    
     const newCityWeather = {
       weather: [{ icon: '10d', description: 'light rain' }],
       main: { temp: 18.3, humidity: 75 },
@@ -172,21 +172,21 @@ describe('Home Component', () => {
       </BrowserRouter>
     );
     
-    // Wait for initial weather to load
+    
     await waitFor(() => {
       expect(screen.getByText('Temperature:')).toBeInTheDocument();
-      // Use a more flexible approach to find the temperature
+      
       expect(screen.getByText(/25.5°C/)).toBeInTheDocument();
     });
     
-    // Search for a new city
+    
     const searchInput = screen.getByPlaceholderText('Enter city');
     fireEvent.change(searchInput, { target: { value: 'London' } });
     
     const searchButton = screen.getByRole('button', { name: 'Search' });
     fireEvent.click(searchButton);
     
-    // Check if the weather for the new city is displayed
+    
     await waitFor(() => {
       expect(screen.getByText('Weather in London')).toBeInTheDocument();
       expect(screen.getByText(/18.3°C/)).toBeInTheDocument();
@@ -203,18 +203,18 @@ describe('Home Component', () => {
       </BrowserRouter>
     );
     
-    // Wait for events to load
+    
     await waitFor(() => {
       expect(screen.getByText('Summer Festival')).toBeInTheDocument();
     });
     
-    // Find the star icon for the Food Fair (which appears to be the first event in the rendered list)
+    
     const foodFairTitle = screen.getByText('Food Fair');
     const foodFairCard = foodFairTitle.closest('.event-card');
     const starIcon = foodFairCard.querySelector('.star-icon');
     fireEvent.click(starIcon);
     
-    // Check if API was called with correct data - ID 3 based on the component ordering
+    
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(
         'http://localhost:5001/api/events/3/favorite',
@@ -226,7 +226,7 @@ describe('Home Component', () => {
   });
 
   test('shows error when trying to favorite without being logged in', async () => {
-    // Mock user not logged in
+    
     jest.spyOn(localStorage, 'getItem').mockImplementation(() => null);
     
     render(
@@ -235,16 +235,16 @@ describe('Home Component', () => {
       </BrowserRouter>
     );
     
-    // Wait for events to load
+    
     await waitFor(() => {
       expect(screen.getByText('Summer Festival')).toBeInTheDocument();
     });
     
-    // Find the first event's star icon and click it
+    
     const starIcons = screen.getAllByText('★');
     fireEvent.click(starIcons[0]);
     
-    // Check error message
+    
     expect(toast.error).toHaveBeenCalledWith('You need to log in to mark favorites.');
     expect(axios.post).not.toHaveBeenCalled();
   });
@@ -259,21 +259,21 @@ describe('Home Component', () => {
       </BrowserRouter>
     );
     
-    // Wait for events to load
+    
     await waitFor(() => {
       expect(screen.getByText('Summer Festival')).toBeInTheDocument();
     });
     
-    // Click on the first event card
+    
     const eventCards = screen.getAllByText('Summer Festival');
     fireEvent.click(eventCards[0]);
     
-    // Check if navigate was called with correct route
+    
     expect(mockNavigate).toHaveBeenCalledWith('/events/1');
   });
 
   test('handles API error when fetching events', async () => {
-    // Mock API error
+    
     axios.get.mockImplementation((url) => {
       if (url === 'http://localhost:5001/api/events') {
         return Promise.reject(new Error('API error'));
@@ -284,7 +284,7 @@ describe('Home Component', () => {
       return Promise.reject(new Error('Not found'));
     });
     
-    // Spy on console.error
+    
     jest.spyOn(console, 'error').mockImplementation(() => {});
     
     render(
@@ -293,7 +293,7 @@ describe('Home Component', () => {
       </BrowserRouter>
     );
     
-    // Check if console.error was called
+    
     await waitFor(() => {
       expect(console.error).toHaveBeenCalledWith(
         'Error fetching latest events:',
@@ -303,7 +303,7 @@ describe('Home Component', () => {
   });
 
   test('handles weather API errors gracefully', async () => {
-    // Mock weather API error
+    
     axios.get.mockImplementation((url) => {
       if (url === 'http://localhost:5001/api/events') {
         return Promise.resolve({ data: mockEvents });
@@ -314,7 +314,7 @@ describe('Home Component', () => {
       return Promise.reject(new Error('Not found'));
     });
     
-    // Spy on console.error
+    
     jest.spyOn(console, 'error').mockImplementation(() => {});
     
     render(
@@ -323,7 +323,7 @@ describe('Home Component', () => {
       </BrowserRouter>
     );
     
-    // Check if console.error was called
+    
     await waitFor(() => {
       expect(console.error).toHaveBeenCalledWith(
         'Error fetching weather data:',
@@ -331,7 +331,7 @@ describe('Home Component', () => {
       );
     });
     
-    // Check if loading message is displayed
+    
     expect(screen.getByText('Loading weather data...')).toBeInTheDocument();
   });
 }); 

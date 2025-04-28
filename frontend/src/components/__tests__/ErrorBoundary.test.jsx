@@ -2,12 +2,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import ErrorBoundary from '../ErrorBoundary';
 
-// Create a component that throws an error
+
 const ThrowError = () => {
   throw new Error('Test error');
 };
 
-// Suppress console.error for the tests
+
 const originalConsoleError = console.error;
 beforeAll(() => {
   console.error = jest.fn();
@@ -39,7 +39,7 @@ describe('ErrorBoundary', () => {
   });
 
   it('calls componentDidCatch when an error occurs', () => {
-    // Create a spy on the componentDidCatch method
+    
     const spy = jest.spyOn(ErrorBoundary.prototype, 'componentDidCatch');
     
     render(
@@ -50,7 +50,7 @@ describe('ErrorBoundary', () => {
     
     expect(spy).toHaveBeenCalled();
     
-    // Clean up the spy
+    
     spy.mockRestore();
   });
 }); 
