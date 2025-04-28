@@ -4,17 +4,7 @@ This document describes how to set up and use the admin functionality for Event 
 
 ## Database Changes
 
-You need to add the admin and ban columns to the users table:
-
-```bash
-cd backend
-node models/migrations/add_admin_ban_columns.js
-```
-
-This script will add the following columns to the users table:
-- `is_admin` (BOOLEAN): Indicates if the user is an admin
-- `is_banned` (BOOLEAN): Indicates if the user is banned
-- `ban_reason` (TEXT): Stores the reason for banning the user
+You need to add the admin to the users table:
 
 ## Creating the Admin User
 
