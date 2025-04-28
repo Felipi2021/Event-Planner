@@ -1,5 +1,4 @@
-
-const { login, getUserDetails, getAverageRating, getCommentCount, updateDescription, addRating, getFavorites, getAttendanceStatus } = require('../../controllers/userController');
+const { login, getUserDetails, getAverageRating, getCommentCount, updateDescription, addRating, getFavorites, getAttendanceStatus, banUser, unbanUser } = require('../../controllers/userController');
 const db = require('../../models/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -26,7 +25,7 @@ describe('User Controller', () => {
   });
 
   describe('login', () => {
-    it('should login a user successfully', async () => {
+    it('should login a regular user successfully', async () => {
       const req = {
         body: {
           email: 'test@example.com',
@@ -42,7 +41,9 @@ describe('User Controller', () => {
         id: 123,
         email: 'test@example.com',
         password: 'hashedPassword',
-        username: 'testuser'
+        username: 'testuser',
+        is_admin: 0,
+        is_banned: 0
       };
 
       db.query.mockImplementation((query, params, callback) => {
@@ -64,12 +65,128 @@ describe('User Controller', () => {
 
       expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashedPassword');
 
-      expect(jwt.sign).toHaveBeenCalled();
+      expect(jwt.sign).toHaveBeenCalledWith(
+        { 
+          id: 123, 
+          email: 'test@example.com',
+          isAdmin: false 
+        }, 
+        'test-secret-key', 
+        { expiresIn: '1h' }
+      );
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith({
         token: mockToken,
-        userId: 123
+        userId: 123,
+        isAdmin: false
+      });
+    });
+
+    it('should login an admin user successfully', async () => {
+      const req = {
+        body: {
+          email: 'admin@example.com',
+          password: 'adminPassword'
+        }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      const mockUser = {
+        id: 456,
+        email: 'admin@example.com',
+        password: 'hashedPassword',
+        username: 'adminuser',
+        is_admin: 1,
+        is_banned: 0
+      };
+
+      db.query.mockImplementation((query, params, callback) => {
+        callback(null, [mockUser]);
+      });
+
+      bcrypt.compare.mockResolvedValue(true);
+
+      const mockToken = 'admin-jwt-token';
+      jwt.sign.mockReturnValue(mockToken);
+
+      await login(req, res);
+
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM users WHERE email = ?',
+        ['admin@example.com'],
+        expect.any(Function)
+      );
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('adminPassword', 'hashedPassword');
+
+      expect(jwt.sign).toHaveBeenCalledWith(
+        { 
+          id: 456, 
+          email: 'admin@example.com',
+          isAdmin: true 
+        }, 
+        'test-secret-key', 
+        { expiresIn: '1h' }
+      );
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        token: mockToken,
+        userId: 456,
+        isAdmin: true
+      });
+    });
+
+    it('should reject login for banned user', async () => {
+      const req = {
+        body: {
+          email: 'banned@example.com',
+          password: 'password123'
+        }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      const mockUser = {
+        id: 789,
+        email: 'banned@example.com',
+        password: 'hashedPassword',
+        username: 'banneduser',
+        is_admin: 0,
+        is_banned: 1,
+        ban_reason: 'Violated community guidelines'
+      };
+
+      db.query.mockImplementation((query, params, callback) => {
+        callback(null, [mockUser]);
+      });
+
+      bcrypt.compare.mockResolvedValue(true);
+
+      await login(req, res);
+
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM users WHERE email = ?',
+        ['banned@example.com'],
+        expect.any(Function)
+      );
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashedPassword');
+
+      // Should not attempt to create a token for banned user
+      expect(jwt.sign).not.toHaveBeenCalled();
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.send).toHaveBeenCalledWith({
+        message: 'Account banned',
+        isBanned: true,
+        banReason: 'Violated community guidelines'
       });
     });
 
@@ -111,7 +228,9 @@ describe('User Controller', () => {
         id: 123,
         email: 'test@example.com',
         password: 'hashedPassword',
-        username: 'testuser'
+        username: 'testuser',
+        is_admin: 0,
+        is_banned: 0
       };
 
       db.query.mockImplementation((query, params, callback) => {
@@ -149,6 +268,123 @@ describe('User Controller', () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith({ message: 'Database error' });
+    });
+  });
+
+  describe('banUser', () => {
+    it('should ban a user successfully when admin requests it', async () => {
+      const req = {
+        user: { isAdmin: true },
+        body: {
+          userId: 123,
+          banReason: 'Spamming'
+        }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      db.query.mockImplementation((query, params, callback) => {
+        callback(null, { affectedRows: 1 });
+      });
+
+      await banUser(req, res);
+
+      expect(db.query).toHaveBeenCalledWith(
+        'UPDATE users SET is_banned = 1, ban_reason = ? WHERE id = ?',
+        ['Spamming', 123],
+        expect.any(Function)
+      );
+
+      expect(res.send).toHaveBeenCalledWith({ message: 'User has been banned successfully' });
+    });
+
+    it('should reject ban request from non-admin user', async () => {
+      const req = {
+        user: { isAdmin: false },
+        body: {
+          userId: 123,
+          banReason: 'Spamming'
+        }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      await banUser(req, res);
+
+      expect(db.query).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Unauthorized: Admin access required' });
+    });
+
+    it('should return 404 when trying to ban non-existent user', async () => {
+      const req = {
+        user: { isAdmin: true },
+        body: {
+          userId: 999,
+          banReason: 'Spamming'
+        }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      db.query.mockImplementation((query, params, callback) => {
+        callback(null, { affectedRows: 0 });
+      });
+
+      await banUser(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
+    });
+  });
+
+  describe('unbanUser', () => {
+    it('should unban a user successfully when admin requests it', async () => {
+      const req = {
+        user: { isAdmin: true },
+        body: { userId: 123 }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      db.query.mockImplementation((query, params, callback) => {
+        callback(null, { affectedRows: 1 });
+      });
+
+      await unbanUser(req, res);
+
+      expect(db.query).toHaveBeenCalledWith(
+        'UPDATE users SET is_banned = 0, ban_reason = NULL WHERE id = ?',
+        [123],
+        expect.any(Function)
+      );
+
+      expect(res.send).toHaveBeenCalledWith({ message: 'User has been unbanned successfully' });
+    });
+
+    it('should reject unban request from non-admin user', async () => {
+      const req = {
+        user: { isAdmin: false },
+        body: { userId: 123 }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      await unbanUser(req, res);
+
+      expect(db.query).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Unauthorized: Admin access required' });
     });
   });
 

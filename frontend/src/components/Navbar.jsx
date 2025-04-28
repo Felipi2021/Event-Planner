@@ -3,17 +3,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../styles/navbar.scss';
 
-const Navbar = ({ isLoggedIn, profileImage }) => {
+const Navbar = ({ isLoggedIn, profileImage, isAdmin, onLogout }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
+    if (onLogout) {
+      onLogout();
+    } else {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('isAdmin');
+    }
+    
     toast.success('You have been logged out successfully!');
     navigate('/login');
     setMenuOpen(false); 
-    window.location.reload();
   };
 
   const handleProfileClick = () => {
@@ -49,6 +54,13 @@ const Navbar = ({ isLoggedIn, profileImage }) => {
         </li>
         {isLoggedIn ? (
           <>
+            {isAdmin && (
+              <li>
+                <Link to="/admin" className="navbar-button admin-link" onClick={handleLinkClick}>
+                  Admin Panel
+                </Link>
+              </li>
+            )}
             <li>
               <button className="navbar-button" onClick={handleLogout}>Logout</button>
             </li>

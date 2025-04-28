@@ -30,5 +30,10 @@ router.get('/:userId/favorites', verifyToken, (req, res) => {
       res.send(results);
     });
   });
-  
+
+router.post('/admin/create', userController.createAdmin);
+router.get('/admin/all-users', verifyToken, userController.getAllUsers);
+router.post('/admin/ban', verifyToken, userController.banUser);
+router.post('/admin/unban', verifyToken, userController.unbanUser);
+
 module.exports = router;

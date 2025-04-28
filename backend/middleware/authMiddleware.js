@@ -25,4 +25,12 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken };
+const verifyAdmin = (req, res, next) => {
+  if (req.user && req.user.isAdmin) {
+    next();
+  } else {
+    res.status(403).send({ message: 'Unauthorized: Admin access required' });
+  }
+};
+
+module.exports = { verifyToken, verifyAdmin };

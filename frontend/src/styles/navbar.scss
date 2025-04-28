@@ -42,6 +42,17 @@
     &:active {
       transform: translateY(0);
     }
+    
+    &.admin-link {
+      background-color: #4c1d95;
+      color: white;
+      border-color: #4c1d95;
+      
+      &:hover {
+        background-color: #6d28d9;
+        border-color: #6d28d9;
+      }
+    }
   }
 
   .profile-image-container {

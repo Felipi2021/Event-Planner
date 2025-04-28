@@ -9,6 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Profile from './pages/Profile';
 import CreateEvent from './pages/CreateEvent';
 import EventDetails from './pages/EventDetails'; 
+import Admin from './pages/Admin';
 import Navbar from './components/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,6 +17,7 @@ import './styles/App.scss';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
 
   const fetchProfileImage = async () => {
@@ -30,23 +32,43 @@ function App() {
       }
     }
   };
+  
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
+    const adminStatus = localStorage.getItem('isAdmin') === 'true';
+    
     if (token && userId) {
       setIsLoggedIn(true);
+      setIsAdmin(adminStatus);
       fetchProfileImage();
     }
   }, []);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
+    setIsAdmin(localStorage.getItem('isAdmin') === 'true');
     fetchProfileImage(); 
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    setProfileImage(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('profileImage');
   };
 
   return (
     <Router>
-      <Navbar isLoggedIn={isLoggedIn} profileImage={profileImage} />
+      <Navbar 
+        isLoggedIn={isLoggedIn} 
+        profileImage={profileImage} 
+        isAdmin={isAdmin} 
+        onLogout={handleLogout}
+      />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/profile/:userId" element={<Profile />} />
@@ -56,6 +78,7 @@ function App() {
         <Route path="/events/:id" element={isLoggedIn ? <EventDetails /> : <Navigate to="/login" />} /> 
         <Route path="/CreateEvent" element={isLoggedIn ? <CreateEvent /> : <Navigate to="/login" />} />
         <Route path="/profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
+        <Route path="/admin" element={isLoggedIn && isAdmin ? <Admin /> : <Navigate to="/" />} />
       </Routes>
       <ToastContainer
         position="top-right"

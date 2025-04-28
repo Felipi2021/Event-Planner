@@ -4,7 +4,9 @@ const db = require('../models/db');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const secretKey = process.env.JWT_SECRET;
+
+// This will ensure tests can properly set the secret key
+const getSecretKey = () => process.env.JWT_SECRET || 'default-secret-key-for-development';
 
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -42,7 +44,7 @@ const register = async (req, res) => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const query = 'INSERT INTO users (username, email, password, image, created_at) VALUES (?, ?, ?, ?, NOW())';
+      const query = 'INSERT INTO users (username, email, password, image, created_at, is_admin, is_banned, ban_reason) VALUES (?, ?, ?, ?, NOW(), 0, 0, NULL)';
       db.query(query, [username, email, hashedPassword, image], (err) => {
         if (err) {
           if (err.code === 'ER_DUP_ENTRY') {
@@ -103,8 +105,30 @@ const login = async (req, res) => {
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) return res.status(401).send({ message: 'Invalid credentials' });
 
-      const token = jwt.sign({ id: user.id, email: user.email }, secretKey, { expiresIn: '1h' });
-      res.status(200).send({ token, userId: user.id });
+      
+      if (user.is_banned) {
+        return res.status(403).send({ 
+          message: 'Account banned', 
+          isBanned: true, 
+          banReason: user.ban_reason || 'No reason provided'
+        });
+      }
+
+      const token = jwt.sign(
+        { 
+          id: user.id, 
+          email: user.email,
+          isAdmin: user.is_admin === 1
+        }, 
+        getSecretKey(), 
+        { expiresIn: '1h' }
+      );
+      
+      res.status(200).send({ 
+        token, 
+        userId: user.id, 
+        isAdmin: user.is_admin === 1 
+      });
     });
   } catch (error) {
     console.error('Error during login:', error);
@@ -193,4 +217,95 @@ const getAttendanceStatus = (req, res) => {
   });
 };
 
-module.exports = { getCommentCount, addRating, getAverageRating, updateDescription, register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus };
+
+const banUser = (req, res) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).send({ message: 'Unauthorized: Admin access required' });
+  }
+
+  const { userId, banReason } = req.body;
+  
+  const query = 'UPDATE users SET is_banned = 1, ban_reason = ? WHERE id = ?';
+  db.query(query, [banReason, userId], (err, result) => {
+    if (err) {
+      console.error('Error banning user:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+    
+    res.send({ message: 'User has been banned successfully' });
+  });
+};
+
+
+const unbanUser = (req, res) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).send({ message: 'Unauthorized: Admin access required' });
+  }
+
+  const { userId } = req.body;
+  
+  const query = 'UPDATE users SET is_banned = 0, ban_reason = NULL WHERE id = ?';
+  db.query(query, [userId], (err, result) => {
+    if (err) {
+      console.error('Error unbanning user:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+    
+    res.send({ message: 'User has been unbanned successfully' });
+  });
+};
+
+
+const getAllUsers = (req, res) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).send({ message: 'Unauthorized: Admin access required' });
+  }
+  
+  const query = 'SELECT id, username, email, image, created_at, is_admin, is_banned, ban_reason FROM users';
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching users:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+    
+    res.send(results);
+  });
+};
+
+
+const createAdmin = async (req, res) => {
+  const { username, email, password } = req.body;
+  const adminSecret = req.body.adminSecret;
+  
+  
+  if (adminSecret !== process.env.ADMIN_SECRET_KEY) {
+    return res.status(403).send({ message: 'Invalid admin secret key' });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const query = 'INSERT INTO users (username, email, password, created_at, is_admin, is_banned, ban_reason) VALUES (?, ?, ?, NOW(), 1, 0, NULL)';
+    
+    db.query(query, [username, email, hashedPassword], (err) => {
+      if (err) {
+        console.error('Error creating admin account:', err);
+        return res.status(500).send({ message: 'Database error', error: err });
+      }
+      
+      res.status(201).send({ message: 'Admin account created successfully!' });
+    });
+  } catch (err) {
+    console.error('Error creating admin account:', err);
+    res.status(500).send({ message: 'Internal server error' });
+  }
+};
+
+module.exports = { getCommentCount, addRating, getAverageRating, updateDescription, register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus, banUser, unbanUser, getAllUsers, createAdmin };

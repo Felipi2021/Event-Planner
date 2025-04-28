@@ -27,7 +27,6 @@ const Events = ({ events }) => {
       setAllEvents(response.data);
       setFilteredEvents(response.data);
 
-      // Fetch attendance status for all events
       const userId = localStorage.getItem('userId');
       if (userId) {
         const attendanceResponse = await axios.get(

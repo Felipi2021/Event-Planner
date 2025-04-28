@@ -88,9 +88,9 @@ describe('Navbar', () => {
 
     expect(localStorageMock.removeItem).toHaveBeenCalledWith('token');
     expect(localStorageMock.removeItem).toHaveBeenCalledWith('userId');
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('isAdmin');
     expect(toast.success).toHaveBeenCalledWith('You have been logged out successfully!');
     expect(mockNavigate).toHaveBeenCalledWith('/login');
-    expect(reloadFn).toHaveBeenCalled();
   });
 
   it('navigates to profile page when profile image is clicked', () => {
