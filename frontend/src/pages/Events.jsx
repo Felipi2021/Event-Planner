@@ -6,6 +6,7 @@ import EventCard from '../components/EventCard';
 import '../styles/events.scss';
 
 const Events = ({ events }) => {
+  const [allEvents, setAllEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [attendanceStatus, setAttendanceStatus] = useState({});
   const [sortCriteria, setSortCriteria] = useState('name');
@@ -23,7 +24,18 @@ const Events = ({ events }) => {
       const response = await axios.get('http://localhost:5001/api/events', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setFilteredEvents(response.data); 
+      setAllEvents(response.data);
+      setFilteredEvents(response.data);
+
+      // Fetch attendance status for all events
+      const userId = localStorage.getItem('userId');
+      if (userId) {
+        const attendanceResponse = await axios.get(
+          `http://localhost:5001/api/users/${userId}/attendance`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setAttendanceStatus(attendanceResponse.data);
+      }
     } catch (error) {
       console.error('Error fetching events:', error);
       toast.error('Failed to fetch events.');
@@ -59,7 +71,7 @@ const Events = ({ events }) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    const filtered = events.filter((event) =>
+    const filtered = allEvents.filter((event) =>
       event.title.toLowerCase().includes(query)
     );
     setFilteredEvents(filtered);
@@ -80,15 +92,22 @@ const Events = ({ events }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success('Attendance marked successfully!');
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: true }));
-      setEvents((prevEvents) =>
+      setFilteredEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
-            ? { ...event, attendees_count: event.attendees_count + 1 }
+            ? { ...event, attendees_count: (event.attendees_count || 0) + 1 }
             : event
         )
       );
+      setAllEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? { ...event, attendees_count: (event.attendees_count || 0) + 1 }
+            : event
+        )
+      );
+      toast.success('You are now attending this event.');
     } catch (error) {
       console.error('Error marking attendance:', error);
       toast.error('Failed to mark attendance.');
@@ -109,15 +128,22 @@ const Events = ({ events }) => {
         data: { userId },
       });
 
-      toast.info('Attendance removed successfully!');
       setAttendanceStatus((prevStatus) => ({ ...prevStatus, [eventId]: false }));
-      setEvents((prevEvents) =>
+      setFilteredEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
-            ? { ...event, attendees_count: Math.max(event.attendees_count - 1, 0) }
+            ? { ...event, attendees_count: Math.max((event.attendees_count || 0) - 1, 0) }
             : event
         )
       );
+      setAllEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? { ...event, attendees_count: Math.max((event.attendees_count || 0) - 1, 0) }
+            : event
+        )
+      );
+      toast.info('You are no longer attending this event.');
     } catch (err) {
       console.error('Error removing attendance:', err);
       toast.error('Failed to remove attendance.');

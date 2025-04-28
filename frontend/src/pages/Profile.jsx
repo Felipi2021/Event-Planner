@@ -32,6 +32,7 @@ const Profile = () => {
 
         if (userResponse?.data) {
           setUserInfo(userResponse.data);
+          setDescription(userResponse.data.description || '');
         } else {
           throw new Error('No user data found');
         }
@@ -84,6 +85,7 @@ const Profile = () => {
       toast.error('Failed to submit rating. Please try again.');
     }
   };
+
   const handleDescriptionSubmit = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -99,6 +101,11 @@ const Profile = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      setUserInfo(prev => ({
+        ...prev,
+        description: description
+      }));
+
       toast.success('Description updated successfully!');
       setIsEditingDescription(false);
     } catch (err) {
@@ -106,15 +113,18 @@ const Profile = () => {
       toast.error('Failed to update description. Please try again.');
     }
   };
+
   const toggleDescription = (eventId) => {
     setExpandedDescriptions((prevState) => ({
       ...prevState,
       [eventId]: !prevState[eventId],
     }));
   };
+
   const handleEventClick = (eventId) => {
     navigate(`/events/${eventId}`);
   };
+
   return (
     <div className="page-container">
       <div className="profile-container">
@@ -138,7 +148,6 @@ const Profile = () => {
                 <p><strong>Comments Posted:</strong> {commentCount}</p> 
                 <p><strong>Average Rating:</strong> {averageRating ? averageRating.toFixed(1) : 'No ratings yet'} / 5</p>
               </div>
-
             </div>
             <div className="description">
               <h3>Description</h3>
@@ -155,12 +164,15 @@ const Profile = () => {
                       <button
                         className="save-button"
                         onClick={handleDescriptionSubmit}
-                        >
-                          Save
-                        </button>
+                      >
+                        Save
+                      </button>
                       <button
                         className="cancel-button"
-                        onClick={() => setIsEditingDescription(false)}
+                        onClick={() => {
+                          setIsEditingDescription(false);
+                          setDescription(userInfo.description || '');
+                        }}
                       >
                         Cancel
                       </button>
@@ -168,12 +180,15 @@ const Profile = () => {
                   </div>
                 ) : (
                   <>
-                    <p>{description || 'No description added.'}</p>
+                    <p>{userInfo.description || 'No description added.'}</p>
                     <p
                       className="add-description"
-                      onClick={() => setIsEditingDescription(true)}
+                      onClick={() => {
+                        setIsEditingDescription(true);
+                        setDescription(userInfo.description || '');
+                      }}
                     >
-                      Add Description +
+                      {userInfo.description ? 'Edit Description' : 'Add Description +'}
                     </p>
                   </>
                 )

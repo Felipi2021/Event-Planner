@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -39,21 +39,10 @@
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-react": "^7.22.0",
-    "jest-environment-jsdom": "^29.7.0"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.(js|jsx)$": "babel-jest"
-    },
-    "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
-    "moduleNameMapper": {
-      "\\.(css|scss)$": "identity-obj-proxy",
-      "\\.(jpg|jpeg|png|gif|webp|svg|eot|otf|ttf|woff|woff2)$": "<rootDir>/__mocks__/fileMock.js"
-    }
+    "jest-environment-jsdom": "^29.7.0",
+    "identity-obj-proxy": "^3.0.0"
   },
   "babel": {
     "presets": ["@babel/preset-env", "@babel/preset-react"]
   }
 }
-

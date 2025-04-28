@@ -154,7 +154,7 @@ const getAverageRating = (req, res) => {
 
 const getUserDetails = (req, res) => {
   const userId = req.params.userId;
-  const query = 'SELECT username, email, image, created_at FROM users WHERE id = ?';
+  const query = 'SELECT username, email, image, created_at, description FROM users WHERE id = ?';
   db.query(query, [userId], (err, results) => {
     if (err || results.length === 0) {
       return res.status(404).send({ message: 'User not found!' });
