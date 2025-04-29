@@ -22,6 +22,14 @@ const DEFAULT_USER_IMAGE = 'default-avatar.png';
 
 const users = [
   {
+    username: 'admin',
+    email: 'admin@example.com',
+    password: 'Admin123!',
+    description: 'System administrator',
+    is_admin: true,
+    is_banned: false
+  },
+  {
     username: 'alice_johnson',
     email: 'alice@example.com',
     password: 'Test123!',
@@ -109,7 +117,7 @@ const events = [
 ];
 
 
-// Flaga wskazująca czy jesteśmy w środowisku testowym
+
 const isTestEnvironment = process.env.NODE_ENV === 'test';
 
 
@@ -197,7 +205,8 @@ async function createUsers() {
 async function createEvents() {
   const eventIds = [];
   
-  for (const event of events) {
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
     try {
       
       const [existingEvents] = await queryPromise(
@@ -212,10 +221,24 @@ async function createEvents() {
       }
       
       
+      const [users] = await queryPromise(
+        'SELECT id FROM users WHERE is_banned = 0 LIMIT 3'
+      );
+      
+      
+      let creatorId = 1;
+      
+      
+      if (users && users.length > 0) {
+        creatorId = users[i % users.length].id;
+      } else {
+        console.log('No users found to assign as event creators, using default ID 1');
+      }
+      
       const insertQuery = `
         INSERT INTO events 
-        (title, description, date, location, capacity, image) 
-        VALUES (?, ?, ?, ?, ?, ?)
+        (title, description, date, location, capacity, image, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
       
       const [result] = await queryPromise(
@@ -226,7 +249,8 @@ async function createEvents() {
           event.date,
           event.location,
           event.capacity,
-          event.image
+          event.image,
+          creatorId
         ]
       );
       
@@ -329,16 +353,13 @@ async function createRegistrations(userIds, eventIds) {
         
         const insertQuery = `
           INSERT INTO registration 
-          (user_id, event_id, created_at) 
-          VALUES (?, ?, DATE_SUB(NOW(), INTERVAL ? DAY))
+          (user_id, event_id) 
+          VALUES (?, ?)
         `;
-        
-        
-        const randomDays = Math.floor(Math.random() * 30);
         
         await queryPromise(
           insertQuery,
-          [userId, eventId, randomDays]
+          [userId, eventId]
         );
         
         registrationCount++;
@@ -384,8 +405,8 @@ async function createFavorites(userIds, eventIds) {
         
         const insertQuery = `
           INSERT INTO favorites 
-          (user_id, event_id, created_at) 
-          VALUES (?, ?, NOW())
+          (user_id, event_id) 
+          VALUES (?, ?)
         `;
         
         await queryPromise(
@@ -417,7 +438,7 @@ function queryPromise(sql, values) {
 }
 
 
-// Uruchom funkcję tylko jeśli plik jest uruchamiany bezpośrednio
+
 if (require.main === module) {
   createFixtures();
 }
