@@ -1,0 +1,113 @@
+@media (max-width: 768px) {
+  .controls-container {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .sort-controls,
+  .search-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .sort-controls label,
+  .search-controls label {
+    font-size: 1rem;
+  }
+
+  .sort-controls select,
+  .search-controls input {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .search-controls button {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+}
+.page-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .page-container h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1a1a1a;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .controls-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  
+    label {
+      font-weight: bold;
+      color: #333;
+    }
+  
+    select {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      background-color: #ffffff;
+      transition: border-color 0.3s ease;
+  
+      &:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+    }
+  }
+  
+  .search-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  
+    label {
+      font-weight: bold;
+      color: #333;
+    }
+  
+    input {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      width: 200px;
+      background-color: #ffffff;
+      transition: border-color 0.3s ease;
+  
+      &:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+    }
+  }

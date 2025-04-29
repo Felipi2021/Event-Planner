@@ -1,0 +1,85 @@
+# Konfiguracja funkcjonalności administratora
+
+Ten dokument opisuje, jak skonfigurować i korzystać z funkcjonalności administratora w aplikacji Event Planner.
+
+## Tworzenie użytkownika administratora
+
+1. Uruchom skrypt tworzenia administratora:
+```bash
+cd backend
+node models/migrations/create_admin_user.js
+```
+
+Utworzy to użytkownika administratora z następującymi danymi:
+- Email: admin@event-planner.com
+- Hasło: Admin123!
+
+## Tworzenie danych testowych (opcjonalne)
+
+Jeśli chcesz wypełnić bazę danych przykładowymi danymi do testowania, możesz uruchomić skrypt:
+
+```bash
+cd backend
+node models/migrations/create_fixtures.js
+```
+
+Ten skrypt utworzy:
+- 5 przykładowych użytkowników (3 zwykłych użytkowników, 2 zablokowanych)
+- 5 wydarzeń z różnymi datami i lokalizacjami
+- około 20 komentarzy do różnych wydarzeń
+- rejestracje na wydarzenia dla zwykłych użytkowników
+- ulubione wydarzenia dla zwykłych użytkowników
+
+Po utworzeniu możesz zalogować się używając przykładowych kont:
+- Zwykli użytkownicy: 
+  - alice@example.com / Test123!
+  - bob@example.com / Test123!
+  - carol@example.com / Test123!
+- Zablokowani użytkownicy:
+  - dave@example.com / Test123!
+  - evan@example.com / Test123!
+
+Zablokowani użytkownicy pozwolą Ci przetestować funkcję blokowania i zobaczyć, jak działa doświadczenie zablokowanego użytkownika.
+
+## Funkcje administratora
+
+Po zalogowaniu jako administrator będziesz mieć dostęp do:
+
+1. Panelu administratora (dostępnego z paska nawigacyjnego)
+2. Zarządzania użytkownikami:
+   - Przeglądanie wszystkich użytkowników
+   - Blokowanie użytkowników (z niestandardowym powodem blokady)
+   - Odblokowywanie użytkowników
+
+## Doświadczenie zablokowanego użytkownika
+
+Gdy zablokowany użytkownik próbuje się zalogować:
+1. Zobaczy komunikat informujący o zablokowaniu
+2. Komunikat będzie zawierał powód podany przez administratora
+3. Nie będzie mógł uzyskać dostępu do żadnej części aplikacji
+
+## Uwagi dotyczące bezpieczeństwa
+
+- Panel administratora jest chroniony zarówno na frontendzie, jak i backendzie
+- Tylko użytkownicy z flagą `is_admin` ustawioną na true mogą uzyskać dostęp do funkcji administratora
+- Weryfikacja tokenów zapewnia, że tylko administratorzy mogą wykonywać działania administratora
+
+## Ręczne tworzenie administratora (w razie potrzeby)
+
+Jeśli musisz ręcznie utworzyć użytkownika administratora, możesz użyć endpointu tworzenia administratora:
+
+```
+POST /api/users/admin/create
+```
+
+Treść:
+```json
+{
+  "username": "Admin",
+  "email": "admin@example.com",
+  "password": "StrongPassword123!",
+  "adminSecret": "your-admin-secret-key"
+}
+```
+
+Wartość `adminSecret` powinna odpowiadać `ADMIN_SECRET_KEY` w twoich zmiennych środowiskowych. 
