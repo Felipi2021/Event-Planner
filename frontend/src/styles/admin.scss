@@ -3,14 +3,29 @@
   margin: 0 auto;
   padding: 2rem;
 
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+
   h1, h2 {
     margin-bottom: 1.5rem;
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+      text-align: center;
+    }
   }
 
   .admin-tabs {
     display: flex;
     margin-bottom: 2rem;
     border-bottom: 1px solid #e2e8f0;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      border-bottom: none;
+      width: 100%;
+    }
 
     button {
       padding: 0.75rem 1.5rem;
@@ -22,12 +37,24 @@
       transition: all 0.2s;
       position: relative;
       
+      @media (max-width: 768px) {
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.25rem;
+        text-align: center;
+      }
+      
       &:hover {
         color: #2d3748;
       }
       
       &.active {
         color: #4299e1;
+        
+        @media (max-width: 768px) {
+          background-color: #ebf8ff;
+        }
         
         &:after {
           content: '';
@@ -37,6 +64,10 @@
           width: 100%;
           height: 2px;
           background-color: #4299e1;
+
+          @media (max-width: 768px) {
+            display: none;
+          }
         }
       }
     }
@@ -44,6 +75,10 @@
 
   .tab-content {
     animation: fadeIn 0.3s ease-in-out;
+    
+    @media (max-width: 768px) {
+      overflow-x: auto;
+    }
   }
 
   .users-table,
@@ -54,10 +89,21 @@
     margin-bottom: 2rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
+    @media (max-width: 768px) {
+      font-size: 0.9rem;
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
     th, td {
       padding: 0.75rem 1rem;
       text-align: left;
       border-bottom: 1px solid #e2e8f0;
+      
+      @media (max-width: 768px) {
+        padding: 0.5rem;
+      }
     }
 
     th {
@@ -86,6 +132,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      
+      @media (max-width: 768px) {
+        max-width: 150px;
+      }
     }
   }
 
@@ -96,6 +146,11 @@
     cursor: pointer;
     transition: all 0.2s;
     border: none;
+    
+    @media (max-width: 768px) {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+    }
     
     &:disabled {
       opacity: 0.5;
@@ -159,10 +214,20 @@
       width: 100%;
       max-width: 500px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      
+      @media (max-width: 768px) {
+        padding: 1.5rem;
+        margin: 0 1rem;
+        max-width: 100%;
+      }
 
       h3 {
         margin-top: 0;
         margin-bottom: 1rem;
+        
+        @media (max-width: 768px) {
+          font-size: 1.25rem;
+        }
       }
 
       label {
@@ -179,30 +244,65 @@
         margin-bottom: 1.5rem;
         resize: vertical;
         font-family: inherit;
+        
+        @media (max-width: 768px) {
+          padding: 0.5rem;
+        }
       }
 
       .modal-actions {
         display: flex;
         justify-content: flex-end;
+        
+        @media (max-width: 768px) {
+          flex-direction: column;
+          
+          button {
+            width: 100%;
+            margin: 0.25rem 0;
+          }
+          
+          .btn-cancel {
+            margin-left: 0;
+          }
+        }
       }
       
       &.delete-confirm-modal {
         max-width: 450px;
         
+        @media (max-width: 768px) {
+          max-width: 100%;
+        }
+        
         p {
           margin-bottom: 1.5rem;
           font-size: 1.1rem;
           line-height: 1.5;
+          
+          @media (max-width: 768px) {
+            font-size: 1rem;
+          }
         }
         
         .btn-delete {
           font-size: 0.95rem;
           padding: 0.6rem 1.2rem;
+          
+          @media (max-width: 768px) {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+          }
         }
         
         .btn-cancel {
           font-size: 0.95rem;
           padding: 0.6rem 1.2rem;
+          
+          @media (max-width: 768px) {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+          }
         }
       }
     }
@@ -244,16 +344,28 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   max-width: 600px;
   width: 100%;
+  
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+  }
 
   h2 {
     color: #e53e3e;
     margin-bottom: 1rem;
     font-size: 2rem;
+    
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
   }
 
   p {
     margin-bottom: 1rem;
     font-size: 1.1rem;
+    
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
   }
 
   .ban-reason {
@@ -266,10 +378,20 @@
     width: 100%;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     font-size: 1.2rem;
+    
+    @media (max-width: 768px) {
+      font-size: 1rem;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
   }
 
   .banned-actions {
     margin-top: 2rem;
+    
+    @media (max-width: 768px) {
+      margin-top: 1.5rem;
+    }
     
     .back-to-home {
       display: inline-block;
@@ -280,6 +402,11 @@
       font-weight: 600;
       text-decoration: none;
       transition: background-color 0.2s;
+      
+      @media (max-width: 768px) {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+      }
       
       &:hover {
         background-color: #3182ce;
