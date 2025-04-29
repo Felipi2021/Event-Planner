@@ -467,7 +467,8 @@ const Home = () =&gt; {
 &nbsp;
     const fetchWeather = async () =&gt; {
       try {
-        const apiKey = '2c3dd76944303cadaf7dacfcde139d15';
+        const apiKey = '2c3dd76944303cadaf7dacfcde139d15'; 
+        //chciałem zmienić klucz na prywatny, ale nie wiedziałem jak go panu przesłac wiec został w repozytorium
         const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?q=${city}&amp;units=metric&amp;appid=${apiKey}`
         );

@@ -20,7 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `event_planner`
 --
-
+create database event_planner;
+use event_planner;
 -- --------------------------------------------------------
 
 --

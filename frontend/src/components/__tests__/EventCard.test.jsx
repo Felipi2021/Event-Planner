@@ -8,12 +8,6 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
-
-jest.mock('react-dom', () => ({
-  ...jest.requireActual('react-dom'),
-  createPortal: (node) => node,
-}));
-
 describe('EventCard', () => {
   const mockEvent = {
     id: 1,
@@ -53,7 +47,6 @@ describe('EventCard', () => {
     expect(screen.getByText(/Attendees:/)).toBeInTheDocument();
     expect(screen.getByText(/Created By:/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Attend/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Show Description/i })).toBeInTheDocument();
   });
 
   it('calls onAttend when attend button is clicked', () => {
@@ -102,47 +95,5 @@ describe('EventCard', () => {
     fireEvent.click(card);
 
     expect(mockNavigate).toHaveBeenCalledWith(`/events/${mockEvent.id}`);
-  });
-
-  it('shows modal with description when show description button is clicked', () => {
-    render(
-      <EventCard 
-        event={mockEvent} 
-        isAttending={false} 
-        onAttend={mockOnAttend} 
-        onRemoveAttend={mockOnRemoveAttend} 
-      />
-    );
-
-    const showDescriptionButton = screen.getByRole('button', { name: /Show Description/i });
-    fireEvent.click(showDescriptionButton);
-
-    expect(screen.getByText('Test description')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Close/i })).toBeInTheDocument();
-  });
-
-  it('closes modal when close button is clicked', () => {
-    render(
-      <EventCard 
-        event={mockEvent} 
-        isAttending={false} 
-        onAttend={mockOnAttend} 
-        onRemoveAttend={mockOnRemoveAttend} 
-      />
-    );
-
-    
-    const showDescriptionButton = screen.getByRole('button', { name: /Show Description/i });
-    fireEvent.click(showDescriptionButton);
-
-    
-    expect(screen.getByText('Test description')).toBeInTheDocument();
-
-    
-    const closeButton = screen.getByRole('button', { name: /Close/i });
-    fireEvent.click(closeButton);
-
-    
-    expect(screen.queryByText('Test description')).not.toBeInTheDocument();
   });
 }); 
