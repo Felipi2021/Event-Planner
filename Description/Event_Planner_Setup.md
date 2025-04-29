@@ -1,6 +1,98 @@
 # Konfiguracja funkcjonalności administratora
 
 Ten dokument opisuje, jak skonfigurować i korzystać z funkcjonalności administratora w aplikacji Event Planner.
+## Instalacja i Konfiguracja
+
+### Wymagania Wstępne
+- Zainstalowane Node.js i npm.
+- Skonfigurowana baza danych MySQL z wymaganym schematem.
+
+### Kroki:
+### 1. Sklonuj repozytorium:
+   ```bash
+   git clone https://github.com/your-repo/event-planner.git
+   ```
+### 2. Przejdź do katalogu projektu:
+   ```bash
+   cd event-planner
+   ```
+### 3. Zainstaluj zależności:
+   ```bash
+   cd frontend
+   npm install
+   cd ../backend
+   npm install
+   ```
+### 4. Skonfiguruj zmienne środowiskowe:
+- **Utwórz plik .env w katalogu backend i dodaj**:
+```bash
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=twoje_hasło
+DB_NAME=event_planner
+JWT_SECRET=twój_klucz_tajny
+PORT=5001
+```
+### 5. Uruchom serwer backend:
+```bash
+cd backend
+npm start
+```
+### 6. Uruchom frontend:
+```bash
+cd frontend
+npm run dev
+```
+
+## Schema Bazy Danych
+
+### Tabela Users
+- **id** (Klucz główny)
+- **username** (nazwa użytkownika)
+- **email** (adres e-mail)
+- **password** (hasło, zahaszowane)
+- **role** (rola: user/admin)
+- **image** (ścieżka do zdjęcia profilowego)
+- **description** (opis profilu)
+- **created_at** (data utworzenia konta)
+- **is_admin** (flaga administratora)
+- **is_banned** (flaga blokady)
+- **ban_reason** (powód blokady)
+
+### Tabela Events
+- **id** (Klucz główny)
+- **title** (tytuł wydarzenia)
+- **description** (opis wydarzenia)
+- **date** (data wydarzenia)
+- **location** (lokalizacja)
+- **capacity** (pojemność)
+- **attendees_count** (liczba uczestników)
+- **created_by** (ID twórcy)
+- **image** (ścieżka do obrazu wydarzenia)
+
+### Tabela Registration
+- **id** (Klucz główny)
+- **user_id** (Klucz obcy do tabeli Users)
+- **event_id** (Klucz obcy do tabeli Events)
+
+### Tabela Comments
+- **id** (Klucz główny)
+- **event_id** (Klucz obcy do tabeli Events)
+- **user_id** (Klucz obcy do tabeli Users)
+- **text** (treść komentarza)
+- **created_at** (data utworzenia)
+
+### Tabela Favorites
+- **id** (Klucz główny)
+- **user_id** (Klucz obcy do tabeli Users)
+- **event_id** (Klucz obcy do tabeli Events)
+
+### Tabela Ratings
+- **id** (Klucz główny)
+- **rater_id** (Klucz obcy do tabeli Users - oceniający)
+- **rated_id** (Klucz obcy do tabeli Users - oceniany)
+- **rating** (ocena, 1-5)
+- **created_at** (data wystawienia oceny)
 
 ## Tworzenie użytkownika administratora
 
