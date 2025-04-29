@@ -46,57 +46,6 @@ npm start
 cd frontend
 npm run dev
 ```
-
-## Schema Bazy Danych
-
-### Tabela Users
-- **id** (Klucz główny)
-- **username** (nazwa użytkownika)
-- **email** (adres e-mail)
-- **password** (hasło, zahaszowane)
-- **role** (rola: user/admin)
-- **image** (ścieżka do zdjęcia profilowego)
-- **description** (opis profilu)
-- **created_at** (data utworzenia konta)
-- **is_admin** (flaga administratora)
-- **is_banned** (flaga blokady)
-- **ban_reason** (powód blokady)
-
-### Tabela Events
-- **id** (Klucz główny)
-- **title** (tytuł wydarzenia)
-- **description** (opis wydarzenia)
-- **date** (data wydarzenia)
-- **location** (lokalizacja)
-- **capacity** (pojemność)
-- **attendees_count** (liczba uczestników)
-- **created_by** (ID twórcy)
-- **image** (ścieżka do obrazu wydarzenia)
-
-### Tabela Registration
-- **id** (Klucz główny)
-- **user_id** (Klucz obcy do tabeli Users)
-- **event_id** (Klucz obcy do tabeli Events)
-
-### Tabela Comments
-- **id** (Klucz główny)
-- **event_id** (Klucz obcy do tabeli Events)
-- **user_id** (Klucz obcy do tabeli Users)
-- **text** (treść komentarza)
-- **created_at** (data utworzenia)
-
-### Tabela Favorites
-- **id** (Klucz główny)
-- **user_id** (Klucz obcy do tabeli Users)
-- **event_id** (Klucz obcy do tabeli Events)
-
-### Tabela Ratings
-- **id** (Klucz główny)
-- **rater_id** (Klucz obcy do tabeli Users - oceniający)
-- **rated_id** (Klucz obcy do tabeli Users - oceniany)
-- **rating** (ocena, 1-5)
-- **created_at** (data wystawienia oceny)
-
 ## Tworzenie użytkownika administratora
 
 1. Uruchom skrypt tworzenia administratora:
