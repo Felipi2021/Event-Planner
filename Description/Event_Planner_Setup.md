@@ -33,12 +33,15 @@ DB_NAME=event_planner
 JWT_SECRET=twój_klucz_tajny
 PORT=5001
 ```
-### 5. Uruchom serwer backend:
+### 5. Zaimportuj baze danych:
+- **Wybierz okno import z panelu phpmyadmin i wstaw plik event_planner.sql**
+
+### 6. Uruchom serwer backend:
 ```bash
 cd backend
 npm start
 ```
-### 6. Uruchom frontend:
+### 7. Uruchom frontend:
 ```bash
 cd frontend
 npm run dev
