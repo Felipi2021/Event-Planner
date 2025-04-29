@@ -511,7 +511,7 @@ describe('Profile Component', () => {
     
     
     await waitFor(() => {
-      expect(screen.getByText("You haven't created any events yet.")).toBeInTheDocument();
+      expect(screen.getByText("testuser hasn't created any events yet.")).toBeInTheDocument();
     });
     
     
@@ -520,7 +520,7 @@ describe('Profile Component', () => {
     
     
     await waitFor(() => {
-      expect(screen.getByText("You haven't marked any events as favorites yet.")).toBeInTheDocument();
+      expect(screen.getByText("testuser hasn't marked any events as favorites yet.")).toBeInTheDocument();
     });
   });
 

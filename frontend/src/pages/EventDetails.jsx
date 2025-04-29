@@ -109,6 +109,7 @@ const EventDetails = () => {
                     text: response.data.text,
                     username: response.data.username,
                     userAvatar: response.data.userAvatar,
+                    user_id: response.data.user_id,
                     created_at: response.data.created_at,
                 },
             ]);
@@ -203,6 +204,15 @@ const EventDetails = () => {
                         src={`http://localhost:5001/uploads/${localStorage.getItem('profileImage') || 'default-avatar.png'}`}
                         alt="Your Profile"
                         className="comment-profile-image"
+                        onClick={() => {
+                            const currentUserId = localStorage.getItem('userId');
+                            if (currentUserId) {
+                                navigate(`/profile/${currentUserId}`);
+                            } else {
+                                toast.error('You need to be logged in to view your profile.');
+                            }
+                        }}
+                        style={{ cursor: 'pointer' }}
                     />
                     <textarea
                         placeholder="Add your comment..."

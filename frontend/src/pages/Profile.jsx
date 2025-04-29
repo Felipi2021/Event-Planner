@@ -262,7 +262,12 @@ const Profile = () => {
             </div>
           ))
         ) : (
-          showCreatedEvents && <p>You haven't created any events yet.</p>
+          showCreatedEvents && 
+            <p>
+              {userId === loggedInUserId 
+                ? "You haven't created any events yet." 
+                : `${userInfo?.username || 'This user'} hasn't created any events yet.`}
+            </p>
         )}
       </div>
       <div className="profile-section">
@@ -311,7 +316,12 @@ const Profile = () => {
             </div>
           ))
         ) : (
-          showFavoriteEvents && <p>You haven't marked any events as favorites yet.</p>
+          showFavoriteEvents && 
+            <p>
+              {userId === loggedInUserId 
+                ? "You haven't marked any events as favorites yet." 
+                : `${userInfo?.username || 'This user'} hasn't marked any events as favorites yet.`}
+            </p>
         )}
       </div>
     </div>

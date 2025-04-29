@@ -273,5 +273,85 @@ const markFavorite = (req, res) => {
   });
 };
 
-module.exports = {upload, getEventById, markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance };
+const deleteEvent = (req, res) => {
+  const eventId = req.params.id;
+  
+  // Check if the user is an admin
+  if (!req.user.isAdmin) {
+    return res.status(403).send({ message: 'Only admins can delete events' });
+  }
+
+  // First delete related records (comments and registrations)
+  const deleteCommentsQuery = 'DELETE FROM comments WHERE event_id = ?';
+  db.query(deleteCommentsQuery, [eventId], (err) => {
+    if (err) {
+      console.error('Error deleting comments:', err);
+      return res.status(500).send({ message: 'Failed to delete event comments', error: err });
+    }
+
+    const deleteRegistrationsQuery = 'DELETE FROM registration WHERE event_id = ?';
+    db.query(deleteRegistrationsQuery, [eventId], (err) => {
+      if (err) {
+        console.error('Error deleting registrations:', err);
+        return res.status(500).send({ message: 'Failed to delete event registrations', error: err });
+      }
+
+      // Finally delete the event
+      const deleteEventQuery = 'DELETE FROM events WHERE id = ?';
+      db.query(deleteEventQuery, [eventId], (err) => {
+        if (err) {
+          console.error('Error deleting event:', err);
+          return res.status(500).send({ message: 'Failed to delete event', error: err });
+        }
+
+        res.status(200).send({ message: 'Event deleted successfully' });
+      });
+    });
+  });
+};
+
+const getEventsWithCommentsForAdmin = (req, res) => {
+  // Check if the user is an admin
+  if (!req.user.isAdmin) {
+    return res.status(403).send({ message: 'Only admins can access this endpoint' });
+  }
+
+  // First get all events
+  const eventsQuery = `
+    SELECT events.*, users.username AS created_by_username
+    FROM events
+    LEFT JOIN users ON events.created_by = users.id
+    ORDER BY events.date DESC
+  `;
+  
+  db.query(eventsQuery, async (err, events) => {
+    if (err) {
+      console.error('Error fetching events for admin:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+
+    // Then get all comments
+    const commentsQuery = `
+      SELECT comments.*, events.title AS event_title, users.username
+      FROM comments
+      JOIN events ON comments.event_id = events.id
+      JOIN users ON comments.user_id = users.id
+      ORDER BY comments.created_at DESC
+    `;
+
+    db.query(commentsQuery, (err, comments) => {
+      if (err) {
+        console.error('Error fetching comments for admin:', err);
+        return res.status(500).send({ message: 'Database error', error: err });
+      }
+
+      res.status(200).send({ 
+        events,
+        comments
+      });
+    });
+  });
+};
+
+module.exports = {upload, getEventById, markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance, deleteEvent, getEventsWithCommentsForAdmin };
 

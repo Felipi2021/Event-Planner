@@ -1,4 +1,4 @@
-const { getAllEvents, getEventById, markAttendance, createEvent, registerForEvent, removeAttendance, markFavorite } = require('../../controllers/eventController');
+const { getAllEvents, getEventById, markAttendance, createEvent, registerForEvent, removeAttendance, markFavorite, deleteEvent, getEventsWithCommentsForAdmin } = require('../../controllers/eventController');
 const db = require('../../models/db');
 
 
@@ -1125,6 +1125,275 @@ describe('Event Controller', () => {
 
       
       expect(console.error).toHaveBeenCalledWith('Error removing favorite:', dbError);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Database error', error: dbError });
+    });
+  });
+
+  describe('deleteEvent', () => {
+    it('should delete an event successfully when user is admin', () => {
+      const req = {
+        params: { id: '123' },
+        user: { isAdmin: true }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      // Mock successful deletion
+      db.query.mockImplementation((query, params, callback) => {
+        callback(null, { affectedRows: 1 });
+      });
+
+      deleteEvent(req, res);
+
+      // Should call query 3 times (delete comments, registrations, and event)
+      expect(db.query).toHaveBeenCalledTimes(3);
+      expect(db.query).toHaveBeenNthCalledWith(
+        1,
+        'DELETE FROM comments WHERE event_id = ?',
+        ['123'],
+        expect.any(Function)
+      );
+      expect(db.query).toHaveBeenNthCalledWith(
+        2,
+        'DELETE FROM registration WHERE event_id = ?',
+        ['123'],
+        expect.any(Function)
+      );
+      expect(db.query).toHaveBeenNthCalledWith(
+        3,
+        'DELETE FROM events WHERE id = ?',
+        ['123'],
+        expect.any(Function)
+      );
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Event deleted successfully' });
+    });
+
+    it('should return 403 when user is not admin', () => {
+      const req = {
+        params: { id: '123' },
+        user: { isAdmin: false }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      deleteEvent(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Only admins can delete events' });
+      expect(db.query).not.toHaveBeenCalled();
+    });
+
+    it('should handle database error when deleting comments', () => {
+      const req = {
+        params: { id: '123' },
+        user: { isAdmin: true }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      const dbError = new Error('Database error');
+      db.query.mockImplementation((query, params, callback) => {
+        callback(dbError, null);
+      });
+
+      console.error = jest.fn();
+
+      deleteEvent(req, res);
+
+      expect(console.error).toHaveBeenCalledWith('Error deleting comments:', dbError);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({ 
+        message: 'Failed to delete event comments', 
+        error: dbError 
+      });
+    });
+
+    it('should handle database error when deleting registrations', () => {
+      const req = {
+        params: { id: '123' },
+        user: { isAdmin: true }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      db.query
+        .mockImplementationOnce((query, params, callback) => {
+          // First call (deleting comments) succeeds
+          callback(null, { affectedRows: 1 });
+        })
+        .mockImplementationOnce((query, params, callback) => {
+          // Second call (deleting registrations) fails
+          callback(new Error('Database error'), null);
+        });
+
+      console.error = jest.fn();
+
+      deleteEvent(req, res);
+
+      expect(console.error).toHaveBeenCalledWith('Error deleting registrations:', expect.any(Error));
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({ 
+        message: 'Failed to delete event registrations', 
+        error: expect.any(Error) 
+      });
+    });
+
+    it('should handle database error when deleting event', () => {
+      const req = {
+        params: { id: '123' },
+        user: { isAdmin: true }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      db.query
+        .mockImplementationOnce((query, params, callback) => {
+          // First call (deleting comments) succeeds
+          callback(null, { affectedRows: 1 });
+        })
+        .mockImplementationOnce((query, params, callback) => {
+          // Second call (deleting registrations) succeeds
+          callback(null, { affectedRows: 1 });
+        })
+        .mockImplementationOnce((query, params, callback) => {
+          // Third call (deleting event) fails
+          callback(new Error('Database error'), null);
+        });
+
+      console.error = jest.fn();
+
+      deleteEvent(req, res);
+
+      expect(console.error).toHaveBeenCalledWith('Error deleting event:', expect.any(Error));
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({ 
+        message: 'Failed to delete event', 
+        error: expect.any(Error) 
+      });
+    });
+  });
+
+  describe('getEventsWithCommentsForAdmin', () => {
+    it('should fetch events and comments when user is admin', () => {
+      const req = {
+        user: { isAdmin: true }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      const mockEvents = [
+        { id: 1, title: 'Event 1' },
+        { id: 2, title: 'Event 2' }
+      ];
+      const mockComments = [
+        { id: 1, text: 'Comment 1', event_id: 1 },
+        { id: 2, text: 'Comment 2', event_id: 2 }
+      ];
+
+      db.query
+        .mockImplementationOnce((query, callback) => {
+          // First call (fetching events) succeeds
+          callback(null, mockEvents);
+        })
+        .mockImplementationOnce((query, callback) => {
+          // Second call (fetching comments) succeeds
+          callback(null, mockComments);
+        });
+
+      getEventsWithCommentsForAdmin(req, res);
+
+      expect(db.query).toHaveBeenCalledTimes(2);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        events: mockEvents,
+        comments: mockComments
+      });
+    });
+
+    it('should return 403 when user is not admin', () => {
+      const req = {
+        user: { isAdmin: false }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      getEventsWithCommentsForAdmin(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Only admins can access this endpoint' });
+      expect(db.query).not.toHaveBeenCalled();
+    });
+
+    it('should handle database error when fetching events', () => {
+      const req = {
+        user: { isAdmin: true }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      const dbError = new Error('Database error');
+      db.query.mockImplementation((query, callback) => {
+        callback(dbError, null);
+      });
+
+      console.error = jest.fn();
+
+      getEventsWithCommentsForAdmin(req, res);
+
+      expect(console.error).toHaveBeenCalledWith('Error fetching events for admin:', dbError);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Database error', error: dbError });
+    });
+
+    it('should handle database error when fetching comments', () => {
+      const req = {
+        user: { isAdmin: true }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      const mockEvents = [
+        { id: 1, title: 'Event 1' },
+        { id: 2, title: 'Event 2' }
+      ];
+      const dbError = new Error('Database error');
+
+      db.query
+        .mockImplementationOnce((query, callback) => {
+          // First call (fetching events) succeeds
+          callback(null, mockEvents);
+        })
+        .mockImplementationOnce((query, callback) => {
+          // Second call (fetching comments) fails
+          callback(dbError, null);
+        });
+
+      console.error = jest.fn();
+
+      getEventsWithCommentsForAdmin(req, res);
+
+      expect(console.error).toHaveBeenCalledWith('Error fetching comments for admin:', dbError);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith({ message: 'Database error', error: dbError });
     });

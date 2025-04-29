@@ -23,7 +23,10 @@ Aplikacja Event-Planner to kompleksowe narzędzie do zarządzania i uczestnictwa
 
 4. **Filtrowanie i wyszukiwanie** - możliwość sortowania wydarzeń według nazwy, daty lub pojemności oraz wyszukiwanie po tytule.
 
-5. **Panel administracyjny** - specjalne funkcje dla administratorów systemu.
+5. **Panel administracyjny** - specjalne funkcje dla administratorów systemu:
+   - Zarządzanie użytkownikami (blokowanie/odblokowywanie)
+   - Moderacja wydarzeń (usuwanie nieodpowiednich)
+   - Moderacja komentarzy (usuwanie nieodpowiednich)
 
 6. **Prognozy pogody** - integracja z API OpenWeatherMap dostarczającym informacje o pogodzie.
 
@@ -73,10 +76,24 @@ Aplikacja wykorzystuje architekturę klient-serwer z wyraźnym podziałem na fro
 - Autoryzacja dostępu do zasobów
 - Zabezpieczenie przed nieautoryzowanym dostępem do chronionych ścieżek
 
+### Testy:
+
+1. **Frontend**:
+   - Pokrycie testami: 93.32% (statements), 94.44% (functions), 86.49% (branches)
+   - Testy jednostkowe dla wszystkich komponentów i stron
+   - Testy integracyjne dla kluczowych funkcjonalności
+   - Pełne pokrycie testami panelu administratora
+
+2. **Backend**:
+   - Pokrycie testami: 85.06% (statements), 89.24% (functions), 80.34% (branches)
+   - Testy jednostkowe dla kontrolerów i middleware
+   - Testy integracyjne dla endpointów API
+   - Pełne pokrycie middleware uwierzytelniającego
+
 ### Przepływ danych:
 
 1. Żądania klienta (frontend) są wysyłane do serwera przez API RESTful
 2. Backend przetwarza żądania, wykonuje operacje na bazie danych i zwraca odpowiednie dane
 3. Frontend renderuje otrzymane dane i umożliwia interakcję użytkownika z aplikacją
 
-Aplikacja Event-Planner to wszechstronne narzędzie do zarządzania wydarzeniami, łączące nowoczesne technologie webowe w celu zapewnienia intuicyjnego i funkcjonalnego doświadczenia użytkownika. 
+Aplikacja Event-Planner to wszechstronne narzędzie do zarządzania wydarzeniami, łączące nowoczesne technologie webowe w celu zapewnienia intuicyjnego i funkcjonalnego doświadczenia użytkownika. Wysoki poziom pokrycia testami zapewnia niezawodność aplikacji i minimalizuje ryzyko wystąpienia błędów. 
