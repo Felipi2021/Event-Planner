@@ -1,4 +1,4 @@
-const { verifyToken } = require('../../middleware/authMiddleware');
+const { verifyToken, verifyAdmin } = require('../../middleware/authMiddleware');
 const jwt = require('jsonwebtoken');
 
 jest.mock('jsonwebtoken', () => ({
@@ -86,4 +86,47 @@ describe('Auth Middleware', () => {
     expect(res.send).toHaveBeenCalledWith({ message: 'Internal server error' });
     expect(next).not.toHaveBeenCalled();
   });
-}); 
+});
+
+describe('Admin Middleware', () => {
+  let req, res, next;
+
+  beforeEach(() => {
+    req = {};
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn()
+    };
+    next = jest.fn();
+  });
+
+  it('should call next if user is admin', () => {
+    req.user = { id: 1, isAdmin: true };
+    
+    verifyAdmin(req, res, next);
+    
+    expect(next).toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.send).not.toHaveBeenCalled();
+  });
+
+  it('should return 403 if user is not admin', () => {
+    req.user = { id: 1, isAdmin: false };
+    
+    verifyAdmin(req, res, next);
+    
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Unauthorized: Admin access required' });
+  });
+
+  it('should return 403 if user object is missing', () => {
+    req.user = undefined;
+    
+    verifyAdmin(req, res, next);
+    
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Unauthorized: Admin access required' });
+  });
+});

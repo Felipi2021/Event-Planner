@@ -109,33 +109,36 @@ const events = [
 ];
 
 
+// Flaga wskazująca czy jesteśmy w środowisku testowym
+const isTestEnvironment = process.env.NODE_ENV === 'test';
+
+
 async function createFixtures() {
-  try {
-    console.log('Starting to create fixtures...');
-    
-    
-    const userIds = await createUsers();
-    console.log(`Created ${userIds.length} users`);
-    
-    
-    const eventIds = await createEvents();
-    console.log(`Created ${eventIds.length} events`);
-    
-    
-    await createComments(userIds, eventIds);
-    
-    
-    await createRegistrations(userIds, eventIds);
-    
-    
-    await createFavorites(userIds, eventIds);
-    
-    console.log('All fixtures created successfully!');
-    process.exit(0);
-  } catch (error) {
-    console.error('Error creating fixtures:', error);
-    process.exit(1);
-  }
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log('Starting to create fixtures...');
+      
+      const userIds = await createUsers();
+      console.log(`Created ${userIds.length} users`);
+      
+      const eventIds = await createEvents();
+      console.log(`Created ${eventIds.length} events`);
+      
+      await createComments(userIds, eventIds);
+      
+      await createRegistrations(userIds, eventIds);
+      
+      await createFavorites(userIds, eventIds);
+      
+      console.log('All fixtures created successfully!');
+      if (!isTestEnvironment) process.exit(0);
+      resolve();
+    } catch (error) {
+      console.error('Error creating fixtures:', error);
+      if (!isTestEnvironment) process.exit(1);
+      reject(error);
+    }
+  });
 }
 
 
@@ -414,4 +417,9 @@ function queryPromise(sql, values) {
 }
 
 
-createFixtures(); 
+// Uruchom funkcję tylko jeśli plik jest uruchamiany bezpośrednio
+if (require.main === module) {
+  createFixtures();
+}
+
+module.exports = { createFixtures }; 

@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/29</span>
+                <span class='fraction'>0/40</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>0/18</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/29</span>
+                <span class='fraction'>0/35</span>
             </div>
         
             
@@ -107,7 +107,33 @@
 <a name='L42'></a><a href='#L42'>42</a>
 <a name='L43'></a><a href='#L43'>43</a>
 <a name='L44'></a><a href='#L44'>44</a>
-<a name='L45'></a><a href='#L45'>45</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -117,22 +143,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -149,12 +164,19 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >require('dotenv').config();</span>
 const bcrypt = <span class="cstat-no" title="statement not covered" >require('bcryptjs');</span>
 const db = <span class="cstat-no" title="statement not covered" >require('../db');</span>
 &nbsp;
+// Flaga wskazująca czy jesteśmy w środowisku testowym
+const isTestEnvironment = <span class="cstat-no" title="statement not covered" >process.env.NODE_ENV === 'test';</span>
 &nbsp;
 const createAdminUser = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
   const email = <span class="cstat-no" title="statement not covered" >'admin@event-planner.com';</span>
@@ -166,12 +188,14 @@ const createAdminUser = <span class="cstat-no" title="statement not covered" ><s
 <span class="cstat-no" title="statement not covered" >    db.query(checkQuery, [email], <span class="fstat-no" title="function not covered" >as</span>ync (err, results) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      if (err) {</span>
 <span class="cstat-no" title="statement not covered" >        console.error('Error checking if admin exists:', err);</span>
-<span class="cstat-no" title="statement not covered" >        process.exit(1);</span>
+<span class="cstat-no" title="statement not covered" >        if (!isTestEnvironment) <span class="cstat-no" title="statement not covered" >process.exit(1);</span></span>
+<span class="cstat-no" title="statement not covered" >        return;</span>
       }
       
 <span class="cstat-no" title="statement not covered" >      if (results.length &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >        console.log('Admin user already exists');</span>
-<span class="cstat-no" title="statement not covered" >        process.exit(0);</span>
+<span class="cstat-no" title="statement not covered" >        if (!isTestEnvironment) <span class="cstat-no" title="statement not covered" >process.exit(0);</span></span>
+<span class="cstat-no" title="statement not covered" >        return;</span>
       }
       
       const hashedPassword = <span class="cstat-no" title="statement not covered" >await bcrypt.hash(password, 10);</span>
@@ -180,29 +204,35 @@ const createAdminUser = <span class="cstat-no" title="statement not covered" ><s
 <span class="cstat-no" title="statement not covered" >      db.query(insertQuery, [username, email, hashedPassword], <span class="fstat-no" title="function not covered" >(e</span>rr) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        if (err) {</span>
 <span class="cstat-no" title="statement not covered" >          console.error('Error creating admin user:', err);</span>
-<span class="cstat-no" title="statement not covered" >          process.exit(1);</span>
+<span class="cstat-no" title="statement not covered" >          if (!isTestEnvironment) <span class="cstat-no" title="statement not covered" >process.exit(1);</span></span>
+<span class="cstat-no" title="statement not covered" >          return;</span>
         }
         
 <span class="cstat-no" title="statement not covered" >        console.log('Admin user created successfully!');</span>
 <span class="cstat-no" title="statement not covered" >        console.log('Email: admin@event-planner.com');</span>
 <span class="cstat-no" title="statement not covered" >        console.log('Password: Admin123!');</span>
-<span class="cstat-no" title="statement not covered" >        process.exit(0);</span>
+<span class="cstat-no" title="statement not covered" >        if (!isTestEnvironment) <span class="cstat-no" title="statement not covered" >process.exit(0);</span></span>
       });
     });
   } catch (err) {
 <span class="cstat-no" title="statement not covered" >    console.error('Unexpected error creating admin user:', err);</span>
-<span class="cstat-no" title="statement not covered" >    process.exit(1);</span>
+<span class="cstat-no" title="statement not covered" >    if (!isTestEnvironment) <span class="cstat-no" title="statement not covered" >process.exit(1);</span></span>
   }
 };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >createAdminUser(); </span></pre></td></tr></table></pre>
+// Uruchom funkcję tylko jeśli plik jest uruchamiany bezpośrednio (node create_admin_user.js)
+<span class="cstat-no" title="statement not covered" >if (require.main === module) {</span>
+<span class="cstat-no" title="statement not covered" >  createAdminUser();</span>
+}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >module.exports = { createAdminUser }; </span></pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-28T22:39:44.891Z
+                at 2025-04-29T14:42:37.835Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
