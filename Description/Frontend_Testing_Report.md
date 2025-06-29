@@ -4,7 +4,7 @@
 
 - **Data testów**: 29.04.2025
 - **Wersja aplikacji**: 0.0.0 (frontend), 1.0.0 (backend)
-- **Pokrycie testami**: 95.7% (statements)
+- **Pokrycie testami**: 93.32% (statements)
 - **Status**: Powodzenie
 
 ## 2. Środowisko testowe
@@ -62,13 +62,16 @@ W ramach testów frontendowych przebadano następujące komponenty i funkcjonaln
 | Zarządzanie użytkownikami | Powodzenie | Poprawne wyświetlanie listy użytkowników i ich statusów |
 | Blokowanie użytkownika | Powodzenie | Poprawna integracja z API blokowania |
 | Odblokowywanie użytkownika | Powodzenie | Poprawne przywracanie dostępu użytkownikom |
+| Zarządzanie wydarzeniami | Powodzenie | Poprawne usuwanie wydarzeń |
+| Zarządzanie komentarzami | Powodzenie | Poprawna moderacja komentarzy |
+| Obsługa błędów API | Powodzenie | Prawidłowa obsługa przypadków błędów |
 
 ## 5. Znalezione problemy
 
 | ID | Opis problemu | Komponent | Priorytet | Status |
 |----|---------------|-----------|-----------|--------|
 | 1 | Brak pełnego pokrycia gałęzi w komponentach | Komponenty | Niski | Otwarty |
-| 2 | Brak testów dla komponentu Admin | Admin.jsx | Średni | Otwarty |
+| 2 | Dodan komplet testów dla Admin.jsx | Admin.jsx | Średni | Zamknięty |
 | 3 | Opóźniona odpowiedź przy wyświetlaniu dużej liczby wydarzeń | Events.jsx | Niski | Otwarty |
 
 ## 6. Pokrycie kodu testami
@@ -76,9 +79,21 @@ W ramach testów frontendowych przebadano następujące komponenty i funkcjonaln
 | Kategoria | Pokrycie linii | Pokrycie funkcji | Pokrycie gałęzi |
 |-----------|----------------|------------------|-----------------|
 | src | 96.87% | 100% | 100% |
-| Komponenty | 98.14% | 100% | 87.5% |
-| Pages | 95.43% | 95.06% | 86.02% |
-| **Całość** | 95.85% | 96.11% | 87.39% |
+| Komponenty | 97.87% | 100% | 86.36% |
+| Pages | 92.72% | 93.39% | 85.34% |
+| **Całość** | 93.37% | 94.44% | 86.49% |
+
+### 6.1. Szczegółowe pokrycie kodu dla komponentów stron
+
+| Komponent | Pokrycie linii | Pokrycie funkcji | Pokrycie gałęzi |
+|-----------|----------------|------------------|-----------------|
+| Admin.jsx | 84.55% | 88% | 89.47% |
+| CreateEvent.jsx | 100% | 100% | 100% |
+| Events.jsx | 100% | 100% | 82.5% |
+| Home.jsx | 90% | 88.23% | 75% |
+| Login.jsx | 95.65% | 100% | 86.95% |
+| Profile.jsx | 91.25% | 90% | 80.26% |
+| Register.jsx | 96.92% | 100% | 97.14% |
 
 ## 7. Przeprowadzone testy manualne
 
@@ -109,7 +124,7 @@ W ramach testów frontendowych przebadano następujące komponenty i funkcjonaln
 
 ## 10. Wnioski
 
-Aplikacja frontendowa Event Planner przeszła testy z wysokim wskaźnikiem powodzenia. Pokrycie kodu testami jest na bardzo dobrym poziomie (95.7%).
+Aplikacja frontendowa Event Planner przeszła testy z wysokim wskaźnikiem powodzenia. Pokrycie kodu testami jest na bardzo dobrym poziomie (93.32%). Dodanie kompletnych testów dla komponentu Admin zwiększyło ogólne pokrycie kodu i zapewniło lepszą jakość testów panelu administracyjnego.
 
 ## 11. Załączniki
 
@@ -121,3 +136,4 @@ Aplikacja frontendowa Event Planner przeszła testy z wysokim wskaźnikiem powod
 
 Raport przygotował: Filip Andrzejczak  
 Data: 29.04.2025 
+Aktualizacja: 30.04.2025 - dodano testy komponentu Admin 

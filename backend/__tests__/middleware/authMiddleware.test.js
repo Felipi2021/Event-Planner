@@ -54,7 +54,7 @@ describe('Auth Middleware', () => {
 
   it('should set user in request and call next if token is valid', () => {
     req.headers['authorization'] = 'Bearer valid_token';
-    const mockUser = { id: 123, username: 'testuser' };
+    const mockUser = { id: 123, username: 'testuser', isAdmin: true };
     jwt.verify.mockImplementation((token, secret, callback) => {
       callback(null, mockUser);
     });

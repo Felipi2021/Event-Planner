@@ -2,7 +2,7 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const db = require('../db');
 
-// Flaga wskazująca czy jesteśmy w środowisku testowym
+
 const isTestEnvironment = process.env.NODE_ENV === 'test';
 
 const createAdminUser = async () => {
@@ -54,7 +54,7 @@ const createAdminUser = async () => {
   });
 };
 
-// Uruchom funkcję tylko jeśli plik jest uruchamiany bezpośrednio (node create_admin_user.js)
+
 if (require.main === module) {
   createAdminUser();
 }

@@ -14,6 +14,8 @@ import Navbar from './components/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './styles/App.scss';
+import Groups from './pages/Groups';
+import CreateGroup from './pages/CreateGroup';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -79,6 +81,8 @@ function App() {
         <Route path="/CreateEvent" element={isLoggedIn ? <CreateEvent /> : <Navigate to="/login" />} />
         <Route path="/profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/admin" element={isLoggedIn && isAdmin ? <Admin /> : <Navigate to="/" />} />
+        <Route path="/groups" element={isLoggedIn ? <Groups /> : <Navigate to="/login" />} />
+        <Route path="/create-group" element={isLoggedIn ? <CreateGroup /> : <Navigate to="/login" />} />
       </Routes>
       <ToastContainer
         position="top-right"

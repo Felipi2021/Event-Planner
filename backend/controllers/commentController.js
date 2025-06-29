@@ -50,11 +50,35 @@ const addComment = (req, res) => {
                 id: result.insertId,
                 text,
                 username: user.username,
-                userAvatar: user.userAvatar, 
+                userAvatar: user.userAvatar,
+                user_id: userId,
                 created_at: new Date(), 
             });
         });
     });
 };
 
-module.exports = { getComments, addComment };
+const deleteComment = (req, res) => {
+    const commentId = req.params.commentId;
+    
+    // Check if the user is an admin
+    if (!req.user.isAdmin) {
+        return res.status(403).send({ message: 'Only admins can delete comments' });
+    }
+    
+    const query = 'DELETE FROM comments WHERE id = ?';
+    db.query(query, [commentId], (err, result) => {
+        if (err) {
+            console.error('Error deleting comment:', err);
+            return res.status(500).send({ message: 'Database error', error: err });
+        }
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ message: 'Comment not found' });
+        }
+        
+        res.status(200).send({ message: 'Comment deleted successfully' });
+    });
+};
+
+module.exports = { getComments, addComment, deleteComment };

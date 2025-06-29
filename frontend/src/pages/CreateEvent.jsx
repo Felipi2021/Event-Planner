@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -12,7 +12,17 @@ const CreateEvent = () => {
   const [location, setLocation] = useState('');
   const [capacity, setCapacity] = useState('');
   const [image, setImage] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    axios.get('/api/groups/all', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => {
+        setGroups((Array.isArray(res.data) ? res.data : []).filter(g => !!g.joined));
+      });
+  }, []);
 
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
@@ -34,6 +44,7 @@ const CreateEvent = () => {
       formData.append('date', date);
       formData.append('location', location);
       formData.append('capacity', capacity);
+      formData.append('group_id', selectedGroup);
       if (image) {
         formData.append('image', image);
       }
@@ -107,6 +118,15 @@ const CreateEvent = () => {
               onChange={(e) => setCapacity(e.target.value)}
               required
             />
+          </div>
+          <div className="form__group">
+            <label htmlFor="group">Group:</label>
+            <select id="group" value={selectedGroup} onChange={e => setSelectedGroup(e.target.value)}>
+              <option value="">No group (public event)</option>
+              {groups.map(group => (
+                <option key={group.id} value={group.id}>{group.name}</option>
+              ))}
+            </select>
           </div>
           <div className="form__group">
             <label htmlFor="eventImage">Event Image:</label>

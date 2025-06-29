@@ -14,29 +14,39 @@ const upload = multer({ storage });
 
 const createEvent = (req, res) => {
   try {
-    const { title, description, date, location, capacity } = req.body;
+    const { title, description, date, location, capacity, group_id } = req.body;
     const image = req.file ? req.file.filename : null;
-    const created_by = req.user.id; 
-
-    console.log('Received request body:', req.body);
-    console.log('Received file:', req.file);
-    console.log('User ID from token:', created_by);
-
+    const created_by = req.user.id;
     if (!title || !description || !date || !location || !capacity) {
-      console.error('Validation failed. Missing fields:', { title, description, date, location, capacity });
       return res.status(400).send({ message: 'All fields are required.' });
     }
-
-    const query = 'INSERT INTO events (title, description, date, location, capacity, created_by, image) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    db.query(query, [title, description, date, location, capacity, created_by, image], (err) => {
+    const query = 'INSERT INTO events (title, description, date, location, capacity, created_by, image, group_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    db.query(query, [title, description, date, location, capacity, created_by, image, group_id], (err, result) => {
       if (err) {
-        console.error('Error inserting event into database:', err);
         return res.status(500).send({ message: 'Failed to create event.', error: err });
+      }
+      // Notify group members if group_id is present
+      if (group_id) {
+        // Fetch creator username and group name, then send notification
+        const getNamesQuery = `SELECT u.username AS creator_name, g.name AS group_name FROM users u, groups g WHERE u.id = ? AND g.id = ?`;
+        db.query(getNamesQuery, [created_by, group_id], (err3, results) => {
+          if (!err3 && results && results[0]) {
+            const creatorName = results[0].creator_name;
+            const groupName = results[0].group_name;
+            const notificationQuery = `INSERT INTO notifications (user_id, message, seen, created_at) SELECT user_id, CONCAT('New event from user ', ?, ' in group ', ?) as message, 0, NOW() FROM group_memberships WHERE group_id = ? AND user_id != ?`;
+            db.query(notificationQuery, [creatorName, groupName, group_id, created_by], (err2) => {
+              if (err2) {
+                console.error('Failed to notify group members:', err2);
+              }
+            });
+          } else {
+            console.error('Failed to fetch creator or group name:', err3);
+          }
+        });
       }
       res.status(201).send({ message: 'Event created successfully!' });
     });
   } catch (err) {
-    console.error('Unexpected error in createEvent:', err);
     res.status(500).send({ message: 'Internal server error', error: err });
   }
 };
@@ -273,5 +283,85 @@ const markFavorite = (req, res) => {
   });
 };
 
-module.exports = {upload, getEventById, markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance };
+const deleteEvent = (req, res) => {
+  const eventId = req.params.id;
+  
+  // Check if the user is an admin
+  if (!req.user.isAdmin) {
+    return res.status(403).send({ message: 'Only admins can delete events' });
+  }
+
+  // First delete related records (comments and registrations)
+  const deleteCommentsQuery = 'DELETE FROM comments WHERE event_id = ?';
+  db.query(deleteCommentsQuery, [eventId], (err) => {
+    if (err) {
+      console.error('Error deleting comments:', err);
+      return res.status(500).send({ message: 'Failed to delete event comments', error: err });
+    }
+
+    const deleteRegistrationsQuery = 'DELETE FROM registration WHERE event_id = ?';
+    db.query(deleteRegistrationsQuery, [eventId], (err) => {
+      if (err) {
+        console.error('Error deleting registrations:', err);
+        return res.status(500).send({ message: 'Failed to delete event registrations', error: err });
+      }
+
+      // Finally delete the event
+      const deleteEventQuery = 'DELETE FROM events WHERE id = ?';
+      db.query(deleteEventQuery, [eventId], (err) => {
+        if (err) {
+          console.error('Error deleting event:', err);
+          return res.status(500).send({ message: 'Failed to delete event', error: err });
+        }
+
+        res.status(200).send({ message: 'Event deleted successfully' });
+      });
+    });
+  });
+};
+
+const getEventsWithCommentsForAdmin = (req, res) => {
+  // Check if the user is an admin
+  if (!req.user.isAdmin) {
+    return res.status(403).send({ message: 'Only admins can access this endpoint' });
+  }
+
+  // First get all events
+  const eventsQuery = `
+    SELECT events.*, users.username AS created_by_username
+    FROM events
+    LEFT JOIN users ON events.created_by = users.id
+    ORDER BY events.date DESC
+  `;
+  
+  db.query(eventsQuery, async (err, events) => {
+    if (err) {
+      console.error('Error fetching events for admin:', err);
+      return res.status(500).send({ message: 'Database error', error: err });
+    }
+
+    // Then get all comments
+    const commentsQuery = `
+      SELECT comments.*, events.title AS event_title, users.username
+      FROM comments
+      JOIN events ON comments.event_id = events.id
+      JOIN users ON comments.user_id = users.id
+      ORDER BY comments.created_at DESC
+    `;
+
+    db.query(commentsQuery, (err, comments) => {
+      if (err) {
+        console.error('Error fetching comments for admin:', err);
+        return res.status(500).send({ message: 'Database error', error: err });
+      }
+
+      res.status(200).send({ 
+        events,
+        comments
+      });
+    });
+  });
+};
+
+module.exports = {upload, getEventById, markFavorite, createEvent, getAllEvents, registerForEvent, markAttendance, removeAttendance, deleteEvent, getEventsWithCommentsForAdmin };
 

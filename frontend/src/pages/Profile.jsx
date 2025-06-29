@@ -37,10 +37,14 @@ const Profile = () => {
           throw new Error('No user data found');
         }
 
-        const ratingResponse = await axios.get(`http://localhost:5001/api/users/${userId}/average-rating`);
+        const ratingResponse = await axios.get(`http://localhost:5001/api/users/${userId}/average-rating`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setAverageRating(ratingResponse.data?.averageRating || 0);
 
-        const createdEventsResponse = await axios.get(`http://localhost:5001/api/events?created_by=${userId}`);
+        const createdEventsResponse = await axios.get(`http://localhost:5001/api/events?created_by=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setCreatedEvents(createdEventsResponse.data || []);
 
         const favoriteEventsResponse = await axios.get(`http://localhost:5001/api/users/${userId}/favorites`, {
@@ -53,7 +57,9 @@ const Profile = () => {
           setFavoriteEvents([]);
         }
 
-        const commentCountResponse = await axios.get(`http://localhost:5001/api/users/${userId}/comments/count`);
+        const commentCountResponse = await axios.get(`http://localhost:5001/api/users/${userId}/comments/count`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setCommentCount(commentCountResponse.data?.count || 0);
       } catch (err) {
         console.error('Error fetching profile data:', err);
@@ -262,7 +268,12 @@ const Profile = () => {
             </div>
           ))
         ) : (
-          showCreatedEvents && <p>You haven't created any events yet.</p>
+          showCreatedEvents && 
+            <p>
+              {userId === loggedInUserId 
+                ? "You haven't created any events yet." 
+                : `${userInfo?.username || 'This user'} hasn't created any events yet.`}
+            </p>
         )}
       </div>
       <div className="profile-section">
@@ -311,7 +322,12 @@ const Profile = () => {
             </div>
           ))
         ) : (
-          showFavoriteEvents && <p>You haven't marked any events as favorites yet.</p>
+          showFavoriteEvents && 
+            <p>
+              {userId === loggedInUserId 
+                ? "You haven't marked any events as favorites yet." 
+                : `${userInfo?.username || 'This user'} hasn't marked any events as favorites yet.`}
+            </p>
         )}
       </div>
     </div>

@@ -4,7 +4,7 @@
 
 - **Data testów**: 29.04.2025
 - **Wersja aplikacji**: 1.0.0
-- **Pokrycie testami**: 80% (statements)
+- **Pokrycie testami**: 85.06% (statements)
 - **Status**: Powodzenie
 
 ## 2. Środowisko testowe
@@ -75,22 +75,23 @@ W ramach testów backendowych przebadano następujące komponenty i funkcjonalno
 | 3 | Niepełne pokrycie funkcji w userRoutes.js | routes/userRoutes.js | Średni | Otwarty |
 | 4 | Brak testów dla przypadków brzegowych w userController.js | controllers/userController.js | Średni | Otwarty |
 | 5 | ~~Niskie pokrycie gałęzi w middleware~~ | ~~middleware/authMiddleware.js~~ | ~~Niski~~ | ~~Otwarty~~ |
+| 5 | Zwiększono pokrycie testami middleware | middleware/authMiddleware.js | Niski | Zamknięty |
 
 ## 6. Pokrycie kodu testami
 
 | Kategoria | Pokrycie linii | Pokrycie funkcji | Pokrycie gałęzi | Pokrycie instrukcji |
 |-----------|----------------|------------------|-----------------|---------------------|
-| controllers | 84.50% | 86.88% | 83.44% | 84.72% |
+| controllers | 86.28% | 88.57% | 85.38% | 86.45% |
 | commentController.js | 100% | 100% | 100% | 100% |
-| eventController.js | 91.30% | 92.00% | 92.20% | 91.30% |
-| userController.js | 75.30% | 80.64% | 71.21% | 76.02% |
+| eventController.js | 92.82% | 93.75% | 93.4% | 92.82% |
+| userController.js | 75.3% | 80.64% | 71.21% | 76.02% |
 | middleware | 100% | 100% | 100% | 100% |
 | models | 100% | 100% | 100% | 100% |
-| models/migrations | 60% | 62% | 55% | 58% |
-| routes | 83.33% | 0% | 0% | 83.33% |
+| models/migrations | 81.64% | 100% | 60.86% | 79.06% |
+| routes | 84.44% | 0% | 0% | 84.44% |
 | eventRoutes.js | 100% | 100% | 100% | 100% |
 | userRoutes.js | 74.07% | 0% | 0% | 74.07% |
-| **Całość** | 78.57% | 81.24% | 79.85% | 80.03% |
+| **Całość** | 85.71% | 89.24% | 80.34% | 85.06% |
 
 ## 7. Testy wydajnościowe
 
@@ -122,7 +123,7 @@ W ramach testów backendowych przebadano następujące komponenty i funkcjonalno
 
 ## 10. Wnioski
 
-Aplikacja backendowa Event Planner przeszła wszystkie zaimplementowane testy (100 testów) z wynikiem pozytywnym. Po rozwiązaniu wcześniejszych problemów, pokrycie testami zwiększyło się do 80%.
+Aplikacja backendowa Event Planner przeszła wszystkie zaimplementowane testy (113 testów) z wynikiem pozytywnym. Znacznie zwiększono pokrycie testami do ponad 85%, co stanowi bardzo dobry wynik dla aplikacji tego typu. Middleware uwierzytelniania osiągnęło 100% pokrycia, co znacząco poprawia bezpieczeństwo aplikacji.
 
 ## 11. Załączniki
 
@@ -133,4 +134,5 @@ Aplikacja backendowa Event Planner przeszła wszystkie zaimplementowane testy (1
 ---
 
 Raport przygotował: Filip Andrzejczak  
-Data: 29.04.2025 
+Data: 29.04.2025  
+Aktualizacja: 30.04.2025 - poprawiono pokrycie testami 
