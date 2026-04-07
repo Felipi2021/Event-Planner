@@ -17,24 +17,33 @@ const EventDetails = () => {
     const [newComment, setNewComment] = useState('');
     const [isAttending, setIsAttending] = useState(false);
     const [attendeesCount, setAttendeesCount] = useState(0);
+    const [storyModalOpen, setStoryModalOpen] = useState(false);
+    const [storyVideo, setStoryVideo] = useState('');
 
     useEffect(() => {
         const fetchEventDetails = async () => {
+            const token = localStorage.getItem('token');
             try {
-                const response = await axios.get(`http://localhost:5001/api/events/${id}`);
+                const response = await axios.get(`http://localhost:5001/api/events/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
                 setEvent(response.data);
                 setAttendeesCount(response.data.attendees_count);
-                const token = localStorage.getItem('token');
                 const userId = localStorage.getItem('userId');
                 if (token && userId) {
-                    const attendanceResponse = await axios.get(
-                        `http://localhost:5001/api/users/${userId}/attendance`
-                    );
-                    setIsAttending(attendanceResponse.data[id] || false);
+                    try {
+                        const attendanceResponse = await axios.get(
+                            `http://localhost:5001/api/users/${userId}/attendance`,
+                            { headers: { Authorization: `Bearer ${token}` } }
+                        );
+                        setIsAttending(attendanceResponse.data[id] || false);
+                    } catch (attendanceErr) {
+                        console.error('Error fetching attendance status:', attendanceErr);
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching event details:', err);
-                setError('Failed to load event details.');
+                setError('Nie udalo sie wczytac szczegolow wydarzenia.');
             } finally {
                 setLoading(false);
             }
@@ -46,7 +55,7 @@ const EventDetails = () => {
                 setComments(response.data || []); 
             } catch (err) {
                 console.error('Error fetching comments:', err);
-                toast.error('Failed to load comments.');
+                toast.error('Nie udalo sie wczytac komentarzy.');
             }
         };
 
@@ -59,7 +68,7 @@ const EventDetails = () => {
             const token = localStorage.getItem('token');
             const userId = localStorage.getItem('userId');
             if (!token || !userId) {
-                toast.error('You need to log in to mark attendance.');
+                toast.error('Musisz sie zalogowac, aby dolaczyc do wydarzenia.');
                 return;
             }
 
@@ -70,7 +79,7 @@ const EventDetails = () => {
                 });
                 setIsAttending(false);
                 setAttendeesCount((prev) => Math.max(prev - 1, 0));
-                toast.info('You are no longer attending this event.');
+                toast.info('Zrezygnowales z udzialu w tym wydarzeniu.');
             } else {
                 await axios.post(
                     `http://localhost:5001/api/events/${id}/attend`,
@@ -79,11 +88,11 @@ const EventDetails = () => {
                 );
                 setIsAttending(true);
                 setAttendeesCount((prev) => prev + 1);
-                toast.success('You are now attending this event.');
+                toast.success('Dolaczyles do tego wydarzenia.');
             }
         } catch (err) {
             console.error('Error updating attendance:', err);
-            toast.error('Failed to update attendance. Please try again.');
+            toast.error('Nie udalo sie zaktualizowac udzialu. Sprobuj ponownie.');
         }
     };
 
@@ -92,7 +101,7 @@ const EventDetails = () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                toast.error('You need to log in to comment.');
+                toast.error('Musisz sie zalogowac, aby dodac komentarz.');
                 return;
             }
 
@@ -114,15 +123,32 @@ const EventDetails = () => {
                 },
             ]);
             setNewComment('');
-            toast.success('Comment added successfully!');
+            toast.success('Komentarz zostal dodany!');
         } catch (err) {
             console.error('Error submitting comment:', err);
-            toast.error('Failed to submit comment. Please try again.');
+            toast.error('Nie udalo sie dodac komentarza. Sprobuj ponownie.');
         }
     };
 
+    const openUserStoryOrProfile = async (targetUserId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`http://localhost:5001/api/users/${targetUserId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+            if (res.data?.story_video) {
+                setStoryVideo(`http://localhost:5001/uploads/${res.data.story_video}`);
+                setStoryModalOpen(true);
+                return;
+            }
+        } catch {
+            // ignore and fallback
+        }
+        navigate(`/profile/${targetUserId}`);
+    };
+
     if (loading) {
-        return <p className="loading-text">Loading event details...</p>;
+        return <p className="loading-text">Ladowanie szczegolow wydarzenia...</p>;
     }
 
     if (error) {
@@ -130,7 +156,7 @@ const EventDetails = () => {
     }
 
     if (!event) {
-        return <p className="not-found-text">Event not found.</p>;
+        return <p className="not-found-text">Nie znaleziono wydarzenia.</p>;
     }
 
     const truncateText = (text, length) => {
@@ -138,10 +164,11 @@ const EventDetails = () => {
     };
 
     return (
+        <>
         <div className="event-details-container">
             <div className="event-header">
                 <h2 className="event-title">
-                    {event.title} - event created by "{event.created_by_username || 'Unknown'}" organized in {event.location} city on {new Date(event.date).toLocaleDateString()}
+                    {event.title} - wydarzenie utworzone przez "{event.created_by_username || 'Nieznany'}" w miescie {event.location}, dnia {new Date(event.date).toLocaleDateString()}
                 </h2>
             </div>
             <div className="event-content">
@@ -158,22 +185,22 @@ const EventDetails = () => {
                 </div>
                 <div className="event-container">
                     <div className="event-info">
-                        <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
-                        <p><strong>Location:</strong> {event.location}</p>
+                        <p><strong>Data:</strong> {new Date(event.date).toLocaleDateString()}</p>
+                        <p><strong>Lokalizacja:</strong> {event.location}</p>
                         <p>
-                            <strong>Created By:</strong>{' '}
+                            <strong>Utworzone przez:</strong>{' '}
                             <span
                                 style={{ color: '#007bff', cursor: 'pointer', textDecoration: 'underline' }}
                                 onClick={() => navigate(`/profile/${event.created_by}`)} 
                             >
-                                {event.created_by_username || 'Unknown'}
+                                {event.created_by_username || 'Nieznany'}
                             </span>
                         </p>
-                        <p><strong>Capacity:</strong> {event.capacity}</p>
-                        <p><strong>Attendees:</strong> {attendeesCount}</p>
+                        <p><strong>Liczba miejsc:</strong> {event.capacity}</p>
+                        <p><strong>Uczestnicy:</strong> {attendeesCount}</p>
                     </div>
                     <div className="event-description-section">
-                        <h3 className="event-description-heading">Description:</h3>
+                        <h3 className="event-description-heading">Opis:</h3>
                         <p className="event-description">
                             {showFullDescription
                                 ? event.description
@@ -183,7 +210,7 @@ const EventDetails = () => {
                                     onClick={() => setShowFullDescription(!showFullDescription)}
                                     className="toggle-description-button"
                                 >
-                                    {showFullDescription ? 'View Less' : 'View More'}
+                                    {showFullDescription ? 'Zwin' : 'Rozwin'}
                                 </button>
                             )}
                         </p>
@@ -191,31 +218,31 @@ const EventDetails = () => {
                             className="attend-button"
                             onClick={handleAttendClick}
                         >
-                            {isAttending ? 'Remove Attendance' : 'Attend'}
+                            {isAttending ? 'Zrezygnuj z udzialu' : 'Dolacz'}
                         </button>
                     </div>
                 </div>
             </div>
 
             <div className="comments-section">
-                <h3>Comments</h3>
+                <h3>Komentarze</h3>
                 <form className="comment-form" onSubmit={handleCommentSubmit}>
                     <img
                         src={`http://localhost:5001/uploads/${localStorage.getItem('profileImage') || 'default-avatar.png'}`}
-                        alt="Your Profile"
+                        alt="Twoj profil"
                         className="comment-profile-image"
                         onClick={() => {
                             const currentUserId = localStorage.getItem('userId');
                             if (currentUserId) {
-                                navigate(`/profile/${currentUserId}`);
+                                openUserStoryOrProfile(currentUserId);
                             } else {
-                                toast.error('You need to be logged in to view your profile.');
+                                toast.error('Musisz byc zalogowany, aby zobaczyc swoj profil.');
                             }
                         }}
                         style={{ cursor: 'pointer' }}
                     />
                     <textarea
-                        placeholder="Add your comment..."
+                        placeholder="Dodaj komentarz..."
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                     ></textarea>
@@ -226,9 +253,9 @@ const EventDetails = () => {
                         <div className="comment-card" key={comment.id}>
                             <img
                                 src={`http://localhost:5001/uploads/${encodeURIComponent(comment.userAvatar || 'default-avatar.png')}`}
-                                alt={`${comment.username}'s avatar`}
+                                alt={`Avatar uzytkownika ${comment.username}`}
                                 className="comment-card-image"
-                                onClick={() => navigate(`/profile/${comment.user_id}`)} 
+                                onClick={() => openUserStoryOrProfile(comment.user_id)} 
                                 style={{ cursor: 'pointer' }} 
                             />
                             <div className="comment-card-content">
@@ -241,6 +268,25 @@ const EventDetails = () => {
                 </div>
             </div>
         </div>
+        {storyModalOpen && (
+            <div style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0, 0, 0, 0.55)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1200,
+            }} onClick={() => setStoryModalOpen(false)}>
+                <div style={{ width: 'min(540px, 92vw)', background: '#fff', borderRadius: '12px', padding: '1rem' }} onClick={(e) => e.stopPropagation()}>
+                    <video src={storyVideo} controls autoPlay style={{ width: '100%', borderRadius: '8px' }} />
+                    <button type="button" onClick={() => setStoryModalOpen(false)} style={{ marginTop: '0.7rem' }}>
+                        Zamknij
+                    </button>
+                </div>
+            </div>
+        )}
+        </>
     );
 };
 

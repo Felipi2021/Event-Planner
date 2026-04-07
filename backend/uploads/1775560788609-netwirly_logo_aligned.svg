@@ -1,0 +1,33 @@
+<svg width="100%" viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    
+  </defs>
+
+  <rect x="40" y="30" width="600" height="220" rx="6" style="fill:rgb(13, 15, 20);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Swirl icon — vertically centered at y=140 -->
+  <g transform="translate(112, 140)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+    <circle cx="0" cy="0" r="28" fill="none" stroke="#378ADD" stroke-width="2" stroke-dasharray="58 30" stroke-linecap="round" style="fill:none;stroke:rgb(55, 138, 221);color:rgb(255, 255, 255);stroke-width:2px;stroke-dasharray:58px, 30px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="0" cy="0" r="18" fill="none" stroke="#85B7EB" stroke-width="2" stroke-dasharray="38 20" stroke-linecap="round" transform="rotate(60)" style="fill:none;stroke:rgb(133, 183, 235);color:rgb(255, 255, 255);stroke-width:2px;stroke-dasharray:38px, 20px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="0" cy="0" r="8" fill="#378ADD" style="fill:rgb(55, 138, 221);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  </g>
+
+  <!-- Left bracket — centered y=140, height 90 so 95 to 185 -->
+  <polyline points="156,95 144,95 144,185 156,185" fill="none" stroke="#378ADD" stroke-width="1.5" stroke-linecap="square" opacity="0.5" style="fill:none;stroke:rgb(55, 138, 221);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:square;stroke-linejoin:miter;opacity:0.5;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- net + wirly on same baseline y=163, centered in card -->
+  <text x="340" y="163" font-family="Arial, sans-serif" font-size="52" font-weight="300" letter-spacing="6" text-anchor="middle" style="fill:rgb(240, 240, 240);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Arial, sans-serif;font-size:52px;font-weight:300;text-anchor:middle;dominant-baseline:auto">net<tspan fill="#378ADD" style="fill:rgb(55, 138, 221);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Arial, sans-serif;font-size:52px;font-weight:300;text-anchor:middle;dominant-baseline:auto">wirly</tspan></text>
+
+  <!-- Right bracket -->
+  <polyline points="524,95 536,95 536,185 524,185" fill="none" stroke="#378ADD" stroke-width="1.5" stroke-linecap="square" opacity="0.5" style="fill:none;stroke:rgb(55, 138, 221);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:square;stroke-linejoin:miter;opacity:0.5;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Top line -->
+  <line x1="156" y1="102" x2="524" y2="102" stroke="#378ADD" stroke-width="0.5" opacity="0.3" style="fill:rgb(0, 0, 0);stroke:rgb(55, 138, 221);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.3;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Bottom line -->
+  <line x1="156" y1="178" x2="524" y2="178" stroke="#378ADD" stroke-width="0.5" opacity="0.3" style="fill:rgb(0, 0, 0);stroke:rgb(55, 138, 221);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.3;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Tagline centered -->
+  <text x="340" y="207" font-family="Arial, sans-serif" font-size="9" font-weight="400" letter-spacing="4" text-anchor="middle" style="fill:rgb(74, 79, 90);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Arial, sans-serif;font-size:9px;font-weight:400;text-anchor:middle;dominant-baseline:auto">WEB DESIGN · DEVELOPMENT · STRATEGY</text>
+
+</svg>

@@ -35,14 +35,14 @@ const EventCard = ({ event, isAttending: initialIsAttending, onAttend, onRemoveA
       </div>
       <div className="event-card__content">
         <h3>{event.title}</h3>
-        <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
-        <p><strong>Location:</strong> {event.location}</p>
-        <p><strong>Capacity:</strong> {event.capacity}</p>
-        <p><strong>Attendees:</strong> {attendeesCount}</p>
-        <p><strong>Created By:</strong> {event.created_by_username || 'Unknown'}</p>
+        <p><strong>Data:</strong> {new Date(event.date).toLocaleDateString()}</p>
+        <p><strong>Lokalizacja:</strong> {event.location}</p>
+        <p><strong>Liczba miejsc:</strong> {event.capacity}</p>
+        <p><strong>Uczestnicy:</strong> {attendeesCount}</p>
+        <p><strong>Utworzone przez:</strong> {event.created_by_username || 'Nieznany'}</p>
         <div className="buttonGroup">
           <button onClick={handleAttendClick}>
-            {isAttending ? 'Remove Attendance' : 'Attend'}
+            {isAttending ? 'Zrezygnuj z udzialu' : 'Dolacz'}
           </button>
         </div>
       </div>

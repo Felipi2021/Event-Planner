@@ -24,7 +24,9 @@ const getGroupsForUser = (userId, callback) => {
 
 const getAllGroupsWithMembership = (userId, callback) => {
   const query = `SELECT g.*, 
-    CASE WHEN gm.status = 'joined' THEN 1 ELSE 0 END AS joined
+    CASE WHEN gm.status = 'joined' THEN 1 ELSE 0 END AS joined,
+    gm.status AS membershipStatus,
+    CASE WHEN gm.status = 'pending' THEN 1 ELSE 0 END AS pending
     FROM groups g
     LEFT JOIN group_memberships gm ON g.id = gm.group_id AND gm.user_id = ?`;
   db.query(query, [userId], callback);

@@ -24,14 +24,14 @@ const Login = ({ onLogin }) => {
       setEmailMessage('');
     } else {
       setEmailValid(false);
-      setEmailMessage('Invalid email format');
+      setEmailMessage('Nieprawidlowy format e-mail');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!emailValid) {
-        toast.error('Please fix the errors before submitting.');
+        toast.error('Popraw bledy przed wyslaniem formularza.');
         return;
     }
     try {
@@ -44,7 +44,7 @@ const Login = ({ onLogin }) => {
         const userDetails = await axios.get(`http://localhost:5001/api/users/${response.data.userId}`);
         localStorage.setItem('profileImage', userDetails.data.image || 'default-avatar.png');
 
-        toast.success('Logged in successfully!');
+        toast.success('Zalogowano pomyslnie!');
         onLogin();
         
         if (response.data.isAdmin) {
@@ -57,12 +57,12 @@ const Login = ({ onLogin }) => {
         
         if (err.response && err.response.data && err.response.data.isBanned) {
             setIsBanned(true);
-            setBanReason(err.response.data.banReason || 'No reason provided');
+            setBanReason(err.response.data.banReason || 'Brak podanego powodu');
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
             localStorage.removeItem('isAdmin');
         } else {
-            toast.error('Login failed. Check your credentials.');
+            toast.error('Logowanie nie powiodlo sie. Sprawdz dane logowania.');
         }
     }
 };
@@ -71,13 +71,13 @@ const Login = ({ onLogin }) => {
     return (
       <div className="banned-page">
         <div className="banned-user">
-          <h2>Account Banned</h2>
-          <p>You have been banned from Event Planner for:</p>
+          <h2>Konto zablokowane</h2>
+          <p>Twoje konto w Event Planner zostalo zablokowane za:</p>
           <p className="ban-reason">{banReason}</p>
-          <p>If you believe this is an error, please contact support.</p>
+          <p>Jesli to pomylka, skontaktuj sie z pomoca techniczna.</p>
           <div className="banned-actions">
             <Link to="/" className="back-to-home">
-              Back to Home
+              Wroc na strone glowna
             </Link>
           </div>
         </div>
@@ -87,7 +87,7 @@ const Login = ({ onLogin }) => {
 
   return (
     <form onSubmit={handleSubmit} className="form-page">
-      <h2>Login</h2>
+      <h2>Logowanie</h2>
       <div className="form__group">
         <label htmlFor="email">Email:</label>
         <input
@@ -101,7 +101,7 @@ const Login = ({ onLogin }) => {
         {!emailValid && <p className="error-message">{emailMessage}</p>}
       </div>
       <div className="form__group">
-        <label htmlFor="password">Password:</label>
+        <label htmlFor="password">Haslo:</label>
         <input
           id="password"
           type="password"
@@ -110,11 +110,11 @@ const Login = ({ onLogin }) => {
           required
         />
       </div>
-      <button type="submit">Login</button>
+      <button type="submit">Zaloguj</button>
       <p style={{ textAlign: 'center', marginTop: '1rem' }}>
-        Don't have an account?{' '}
+        Nie masz konta?{' '}
         <Link to="/register" style={{ color: '#007bff', textDecoration: 'underline' }}>
-          Register
+          Zarejestruj sie
         </Link>
       </p>
     </form>

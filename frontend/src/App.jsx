@@ -16,6 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './styles/App.scss';
 import Groups from './pages/Groups';
 import CreateGroup from './pages/CreateGroup';
+import MapPage from './pages/Map';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -77,6 +78,7 @@ function App() {
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register />} />
         <Route path="/events" element={isLoggedIn ? <Events /> : <Navigate to="/login" />} />
+        <Route path="/mapa" element={isLoggedIn ? <MapPage /> : <Navigate to="/login" />} />
         <Route path="/events/:id" element={isLoggedIn ? <EventDetails /> : <Navigate to="/login" />} /> 
         <Route path="/CreateEvent" element={isLoggedIn ? <CreateEvent /> : <Navigate to="/login" />} />
         <Route path="/profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />

@@ -10,7 +10,10 @@ router.get('/:userId', userController.getUserDetails);
 router.post('/rate', verifyToken, addRating); 
 router.get('/:userId/comments/count', getCommentCount);
 router.get('/:userId/average-rating', getAverageRating);
+router.get('/:userId/stories', verifyToken, userController.getUserStories);
 router.put('/:userId/description', verifyToken, userController.updateDescription);
+router.put('/:userId/story', verifyToken, userController.uploadStory);
+router.post('/:userId/balance/topup', verifyToken, userController.topUpBalance);
 router.get('/:userId/favorites', verifyToken, userController.getFavorites);
 router.get('/:userId/attendance', userController.getAttendanceStatus);
 router.get('/:userId/favorites', verifyToken, (req, res) => {

@@ -17,7 +17,7 @@ const Events = ({ events }) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('You need to log in.');
+        toast.error('Musisz sie zalogowac.');
         return;
       }
 
@@ -37,7 +37,7 @@ const Events = ({ events }) => {
       }
     } catch (error) {
       console.error('Error fetching events:', error);
-      toast.error('Failed to fetch events.');
+      toast.error('Nie udalo sie pobrac wydarzen.');
     }
   };
 
@@ -81,7 +81,7 @@ const Events = ({ events }) => {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       if (!token || !userId) {
-        toast.error('You need to log in to mark attendance.');
+        toast.error('Musisz sie zalogowac, aby dolaczyc do wydarzenia.');
         return;
       }
 
@@ -106,10 +106,10 @@ const Events = ({ events }) => {
             : event
         )
       );
-      toast.success('You are now attending this event.');
+      toast.success('Dolaczyles do tego wydarzenia.');
     } catch (error) {
       console.error('Error marking attendance:', error);
-      toast.error('Failed to mark attendance.');
+      toast.error('Nie udalo sie zapisac udzialu.');
     }
   };
 
@@ -118,7 +118,7 @@ const Events = ({ events }) => {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       if (!token || !userId) {
-        toast.error('You need to log in to remove attendance.');
+        toast.error('Musisz sie zalogowac, aby zrezygnowac z udzialu.');
         return;
       }
 
@@ -142,41 +142,41 @@ const Events = ({ events }) => {
             : event
         )
       );
-      toast.info('You are no longer attending this event.');
+      toast.info('Zrezygnowales z udzialu w tym wydarzeniu.');
     } catch (err) {
       console.error('Error removing attendance:', err);
-      toast.error('Failed to remove attendance.');
+      toast.error('Nie udalo sie zrezygnowac z udzialu.');
     }
   };
 
   return (
     <div className="page-container">
-      <h2>Available Events</h2>
+      <h2>Dostepne wydarzenia</h2>
       <div className="controls-container">
         <div className="sort-controls">
-          <label>Sort by:</label>
+          <label>Sortuj wedlug:</label>
           <select
             onChange={(e) => handleSort(e.target.value, sortOrder)}
             value={sortCriteria}
           >
-            <option value="name">Name</option>
-            <option value="date">Date of Event</option>
-            <option value="capacity">Capacity</option>
+            <option value="name">Nazwa</option>
+            <option value="date">Data wydarzenia</option>
+            <option value="capacity">Liczba miejsc</option>
           </select>
-          <label>Order:</label>
+          <label>Kolejnosc:</label>
           <select
             onChange={(e) => handleSort(sortCriteria, e.target.value)}
             value={sortOrder}
           >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
+            <option value="asc">Rosnaco</option>
+            <option value="desc">Malejaco</option>
           </select>
         </div>
         <div className="search-controls">
-          <label>Search:</label>
+          <label>Szukaj:</label>
           <input
             type="text"
-            placeholder="Search events by title"
+            placeholder="Szukaj wydarzen po tytule"
             value={searchQuery}
             onChange={handleSearch}
           />

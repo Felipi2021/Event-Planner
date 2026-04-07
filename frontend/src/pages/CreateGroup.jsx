@@ -21,27 +21,27 @@ const CreateGroup = () => {
           Authorization: `Bearer ${token}`
         }
       });
-      setCreateStatus('Group created!');
+      setCreateStatus('Grupa zostala utworzona!');
       setCreateData({ name: '', description: '', privacy: 'public', image: null });
     } catch {
-      setCreateStatus('Failed to create group');
+      setCreateStatus('Nie udalo sie utworzyc grupy');
     }
   };
 
   return (
     <div className="groups-page">
       <div className="create-section">
-        <h2>Create Group</h2>
+        <h2>Utworz grupe</h2>
         <form onSubmit={handleCreate}>
-          <input required placeholder="Group Name" value={createData.name} onChange={e => setCreateData({ ...createData, name: e.target.value })} />
-          <textarea placeholder="Description" value={createData.description} onChange={e => setCreateData({ ...createData, description: e.target.value })} style={{ fontFamily: 'inherit', fontSize: 'inherit', resize: 'none' }} />
+          <input required placeholder="Nazwa grupy" value={createData.name} onChange={e => setCreateData({ ...createData, name: e.target.value })} />
+          <textarea placeholder="Opis" value={createData.description} onChange={e => setCreateData({ ...createData, description: e.target.value })} style={{ fontFamily: 'inherit', fontSize: 'inherit', resize: 'none' }} />
           <select value={createData.privacy} onChange={e => setCreateData({ ...createData, privacy: e.target.value })}>
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-            <option value="open">Open</option>
+            <option value="public">Publiczna</option>
+            <option value="private">Prywatna</option>
+            <option value="open">Otwarta</option>
           </select>
           <input type="file" accept="image/*" onChange={e => setCreateData({ ...createData, image: e.target.files[0] })} />
-          <button type="submit">Create Group</button>
+          <button type="submit">Utworz grupe</button>
           {createStatus && <div className="status">{createStatus}</div>}
         </form>
       </div>

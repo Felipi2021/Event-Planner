@@ -22,7 +22,8 @@
   }
 }
 .events-section {
-    flex: 0 0 70%; 
+    width: 100%;
+    min-width: 0;
     background: #ffffff;
     padding: 1rem;
     border-radius: 8px;
@@ -53,7 +54,7 @@
 }
   
 .news-section {
-    flex: 0 0 30%; 
+    width: 100%;
     background: #f9f9f9;
     padding: 1rem;
     border-radius: 8px;
@@ -149,6 +150,34 @@
     color: #555;
     margin: 0.5rem 0;
   }
+
+.monetization-section {
+  margin-top: 1.5rem;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.monetization-section h2,
+.monetization-section h3 {
+  color: #ad6800;
+  margin-bottom: 0.5rem;
+}
+
+.monetization-section p {
+  color: #6b4e00;
+}
+
+.monetization-section button {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  background: #fa8c16;
+}
+
+.monetization-section button:hover {
+  background: #d46b08;
+}
   
 .search-panel {
     display: flex;
@@ -176,10 +205,17 @@
     background-color: #0056b3;
 }
 .home-container {
-    display: flex;
-    flex-wrap: wrap; 
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+    align-items: start;
     gap: 2rem;
     padding: 2rem;
+    width: 100%;
+}
+
+.right-section {
+    width: 100%;
+    min-width: 0;
 }
 
 .welcome-section {
@@ -308,3 +344,10 @@
       color: rgba(0, 0, 0, 0.7);
     }
   }
+
+@media (max-width: 1024px) {
+  .home-container {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+}

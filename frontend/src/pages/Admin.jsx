@@ -24,7 +24,7 @@ const Admin = () => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
     if (!isAdmin) {
       navigate('/');
-      toast.error('Unauthorized access');
+      toast.error('Brak uprawnien');
     } else {
       fetchUsers();
       fetchEventsAndComments();
@@ -46,8 +46,8 @@ const Admin = () => {
       setError(null);
     } catch (err) {
       console.error('Error fetching users:', err);
-      setError('Failed to load users');
-      toast.error('Failed to load users');
+      setError('Nie udalo sie wczytac uzytkownikow');
+      toast.error('Nie udalo sie wczytac uzytkownikow');
     } finally {
       setLoading(false);
     }
@@ -69,8 +69,8 @@ const Admin = () => {
       setError(null);
     } catch (err) {
       console.error('Error fetching events and comments:', err);
-      setError('Failed to load events and comments');
-      toast.error('Failed to load events and comments');
+      setError('Nie udalo sie wczytac wydarzen i komentarzy');
+      toast.error('Nie udalo sie wczytac wydarzen i komentarzy');
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,7 @@ const Admin = () => {
 
   const handleBanUser = async () => {
     if (!banReason.trim()) {
-      toast.error('Ban reason is required');
+      toast.error('Powod blokady jest wymagany');
       return;
     }
 
@@ -94,12 +94,12 @@ const Admin = () => {
         }
       );
       
-      toast.success('User banned successfully');
+      toast.success('Uzytkownik zostal zablokowany');
       closeModal();
       fetchUsers();
     } catch (err) {
       console.error('Error banning user:', err);
-      toast.error('Failed to ban user');
+      toast.error('Nie udalo sie zablokowac uzytkownika');
     }
   };
 
@@ -116,11 +116,11 @@ const Admin = () => {
         }
       );
       
-      toast.success('User unbanned successfully');
+      toast.success('Uzytkownik zostal odblokowany');
       fetchUsers();
     } catch (err) {
       console.error('Error unbanning user:', err);
-      toast.error('Failed to unban user');
+      toast.error('Nie udalo sie odblokowac uzytkownika');
     }
   };
 
@@ -157,11 +157,11 @@ const Admin = () => {
         }
       });
       
-      toast.success('Event deleted successfully');
+      toast.success('Wydarzenie zostalo usuniete');
       fetchEventsAndComments(); 
     } catch (err) {
       console.error('Error deleting event:', err);
-      toast.error('Failed to delete event');
+      toast.error('Nie udalo sie usunac wydarzenia');
     }
   };
 
@@ -175,11 +175,11 @@ const Admin = () => {
         }
       });
       
-      toast.success('Comment deleted successfully');
+      toast.success('Komentarz zostal usuniety');
       fetchEventsAndComments(); 
     } catch (err) {
       console.error('Error deleting comment:', err);
-      toast.error('Failed to delete comment');
+      toast.error('Nie udalo sie usunac komentarza');
     }
   };
 
@@ -210,45 +210,45 @@ const Admin = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  if (loading) return <div className="admin-page">Loading...</div>;
-  if (error) return <div className="admin-page">Error: {error}</div>;
+  if (loading) return <div className="admin-page">Ladowanie...</div>;
+  if (error) return <div className="admin-page">Blad: {error}</div>;
 
   return (
     <div className="admin-page">
-      <h1>Admin Panel</h1>
+      <h1>Panel administratora</h1>
       
       <div className="admin-tabs">
         <button 
           className={activeTab === 'users' ? 'active' : ''} 
           onClick={() => setActiveTab('users')}
         >
-          Users
+          Uzytkownicy
         </button>
         <button 
           className={activeTab === 'events' ? 'active' : ''} 
           onClick={() => setActiveTab('events')}
         >
-          Events
+          Wydarzenia
         </button>
         <button 
           className={activeTab === 'comments' ? 'active' : ''} 
           onClick={() => setActiveTab('comments')}
         >
-          Comments
+          Komentarze
         </button>
       </div>
 
       {activeTab === 'users' && (
         <div className="tab-content">
-          <h2>User Management</h2>
+          <h2>Zarzadzanie uzytkownikami</h2>
           <table className="users-table">
             <thead>
               <tr>
-                <th>Username</th>
+                <th>Nazwa uzytkownika</th>
                 <th>Email</th>
-                <th>Admin</th>
+                <th>Administrator</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th>Akcje</th>
               </tr>
             </thead>
             <tbody>
@@ -256,13 +256,13 @@ const Admin = () => {
                 <tr key={user.id} className={user.is_banned ? 'banned-row' : ''}>
                   <td>{user.username}</td>
                   <td>{user.email}</td>
-                  <td>{user.is_admin ? 'Yes' : 'No'}</td>
+                  <td>{user.is_admin ? 'Tak' : 'Nie'}</td>
                   <td>
                     {user.is_banned ? (
                       <span className="banned-badge" title={user.ban_reason}>
-                        Banned
+                        Zablokowany
                       </span>
-                    ) : 'Active'}
+                    ) : 'Aktywny'}
                   </td>
                   <td>
                     {user.is_banned ? (
@@ -270,7 +270,7 @@ const Admin = () => {
                         onClick={() => handleUnbanUser(user.id)}
                         className="btn-unban"
                       >
-                        Unban
+                        Odblokuj
                       </button>
                     ) : (
                       <button 
@@ -278,7 +278,7 @@ const Admin = () => {
                         className="btn-ban"
                         disabled={user.is_admin}
                       >
-                        Ban
+                        Zablokuj
                       </button>
                     )}
                   </td>
@@ -291,15 +291,15 @@ const Admin = () => {
 
       {activeTab === 'events' && (
         <div className="tab-content">
-          <h2>Events Management</h2>
+          <h2>Zarzadzanie wydarzeniami</h2>
           <table className="events-table">
             <thead>
               <tr>
-                <th>Title</th>
-                <th>Created By</th>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Actions</th>
+                <th>Tytul</th>
+                <th>Utworzone przez</th>
+                <th>Data</th>
+                <th>Lokalizacja</th>
+                <th>Akcje</th>
               </tr>
             </thead>
             <tbody>
@@ -318,7 +318,7 @@ const Admin = () => {
                       onClick={() => openDeleteConfirmation('event', event.id)}
                       className="btn-delete"
                     >
-                      Delete
+                      Usun
                     </button>
                   </td>
                 </tr>
@@ -330,15 +330,15 @@ const Admin = () => {
 
       {activeTab === 'comments' && (
         <div className="tab-content">
-          <h2>Comments Management</h2>
+          <h2>Zarzadzanie komentarzami</h2>
           <table className="comments-table">
             <thead>
               <tr>
-                <th>Event</th>
-                <th>User</th>
-                <th>Comment</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th>Wydarzenie</th>
+                <th>Uzytkownik</th>
+                <th>Komentarz</th>
+                <th>Data</th>
+                <th>Akcje</th>
               </tr>
             </thead>
             <tbody>
@@ -357,7 +357,7 @@ const Admin = () => {
                       onClick={() => openDeleteConfirmation('comment', comment.id, comment.event_id)}
                       className="btn-delete"
                     >
-                      Delete
+                      Usun
                     </button>
                   </td>
                 </tr>
@@ -371,23 +371,23 @@ const Admin = () => {
       {showModal && selectedUser && (
         <div className="modal">
           <div className="modal-content">
-            <h3>Ban User: {selectedUser.username}</h3>
-            <label htmlFor="banReason">Reason for ban:</label>
+            <h3>Zablokuj uzytkownika: {selectedUser.username}</h3>
+            <label htmlFor="banReason">Powod blokady:</label>
             <textarea
               id="banReason"
               value={banReason}
               onChange={handleBanReasonChange}
-              placeholder="Enter reason for banning this user"
+              placeholder="Wpisz powod zablokowania tego uzytkownika"
               rows={4}
               required
               autoFocus
             />
             <div className="modal-actions">
               <button onClick={handleBanUser} className="btn-ban">
-                Ban User
+                Zablokuj uzytkownika
               </button>
               <button onClick={closeModal} className="btn-cancel">
-                Cancel
+                Anuluj
               </button>
             </div>
           </div>
@@ -398,17 +398,17 @@ const Admin = () => {
       {showDeleteModal && (
         <div className="modal">
           <div className="modal-content delete-confirm-modal">
-            <h3>Confirm Deletion</h3>
+            <h3>Potwierdz usuniecie</h3>
             <p>
-              Are you sure you want to delete this {deleteType}? 
-              This action cannot be undone.
+              Czy na pewno chcesz usunac ten element ({deleteType})? 
+              Tej operacji nie mozna cofnac.
             </p>
             <div className="modal-actions">
               <button onClick={confirmDelete} className="btn-delete">
-                Yes, Delete
+                Tak, usun
               </button>
               <button onClick={closeDeleteConfirmation} className="btn-cancel">
-                No, Cancel
+                Nie, anuluj
               </button>
             </div>
           </div>

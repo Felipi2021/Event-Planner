@@ -11,59 +11,267 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+let promotionSchemaEnsured = false;
+let postingPermissionsSchemaEnsured = false;
+
+const PROMOTION_COSTS = {
+  0: 0,
+  3: 7,
+  7: 9,
+  10: 10,
+  30: 15,
+};
+
+const ensurePromotionSchema = async () => {
+  if (promotionSchemaEnsured) return;
+
+  const ensureColumn = async (table, column, definition) => {
+    const exists = await new Promise((resolve, reject) => {
+      db.query(`SHOW COLUMNS FROM ${table} LIKE ?`, [column], (err, results) => {
+        if (err) return reject(err);
+        resolve(Array.isArray(results) && results.length > 0);
+      });
+    });
+
+    if (!exists) {
+      await new Promise((resolve, reject) => {
+        db.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    }
+  };
+
+  await ensureColumn('users', 'balance', 'DECIMAL(10,2) NOT NULL DEFAULT 0');
+  await ensureColumn('events', 'promotion_days', 'INT NOT NULL DEFAULT 0');
+  await ensureColumn('events', 'promotion_cost', 'DECIMAL(10,2) NOT NULL DEFAULT 0');
+  await ensureColumn('events', 'promoted_until', 'DATETIME NULL');
+  await ensureColumn('events', 'latitude', 'DECIMAL(10,7) NULL');
+  await ensureColumn('events', 'longitude', 'DECIMAL(10,7) NULL');
+  promotionSchemaEnsured = true;
+};
+
+const queryAsync = (query, params = []) =>
+  new Promise((resolve, reject) => {
+    db.query(query, params, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+
+const ensurePostingPermissionsSchema = async () => {
+  if (postingPermissionsSchemaEnsured) return;
+  const modeColumnExists = await queryAsync("SHOW COLUMNS FROM groups LIKE 'post_permission_mode'");
+  if (!Array.isArray(modeColumnExists) || modeColumnExists.length === 0) {
+    await queryAsync("ALTER TABLE groups ADD COLUMN post_permission_mode VARCHAR(32) NOT NULL DEFAULT 'all_members'");
+  }
+  await queryAsync(`
+    CREATE TABLE IF NOT EXISTS group_post_permissions (
+      group_id INT NOT NULL,
+      user_id INT NOT NULL,
+      PRIMARY KEY (group_id, user_id)
+    )
+  `);
+  postingPermissionsSchemaEnsured = true;
+};
 
 const createEvent = (req, res) => {
-  try {
-    const { title, description, date, location, capacity, group_id } = req.body;
+  const createEventAsync = async () => {
+    try {
+    await ensurePromotionSchema();
+    await ensurePostingPermissionsSchema();
+    const { title, description, date, location, capacity, group_id, promotionDays, latitude, longitude } = req.body;
+    const normalizedLatitude = latitude !== undefined && latitude !== null && latitude !== '' ? Number(latitude) : null;
+    const normalizedLongitude = longitude !== undefined && longitude !== null && longitude !== '' ? Number(longitude) : null;
     const image = req.file ? req.file.filename : null;
     const created_by = req.user.id;
+    const selectedPromotionDays = Number(promotionDays || 0);
+    const promotionCost = PROMOTION_COSTS[selectedPromotionDays];
+    if (promotionCost === undefined) {
+      return res.status(400).send({ message: 'Nieprawidlowa opcja promocji.' });
+    }
+
+    const normalizedGroupId = group_id ? Number(group_id) : null;
+    const promotedUntil = selectedPromotionDays > 0
+      ? new Date(Date.now() + (selectedPromotionDays * 24 * 60 * 60 * 1000))
+      : null;
+
     if (!title || !description || !date || !location || !capacity) {
       return res.status(400).send({ message: 'All fields are required.' });
     }
-    const query = 'INSERT INTO events (title, description, date, location, capacity, created_by, image, group_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-    db.query(query, [title, description, date, location, capacity, created_by, image, group_id], (err, result) => {
-      if (err) {
-        return res.status(500).send({ message: 'Failed to create event.', error: err });
+
+    if (normalizedGroupId) {
+      const groups = await queryAsync('SELECT id, creator_id, post_permission_mode FROM groups WHERE id = ?', [normalizedGroupId]);
+      if (!groups.length) {
+        return res.status(404).send({ message: 'Group not found.' });
       }
-      // Notify group members if group_id is present
-      if (group_id) {
-        // Fetch creator username and group name, then send notification
-        const getNamesQuery = `SELECT u.username AS creator_name, g.name AS group_name FROM users u, groups g WHERE u.id = ? AND g.id = ?`;
-        db.query(getNamesQuery, [created_by, group_id], (err3, results) => {
-          if (!err3 && results && results[0]) {
-            const creatorName = results[0].creator_name;
-            const groupName = results[0].group_name;
-            const notificationQuery = `INSERT INTO notifications (user_id, message, seen, created_at) SELECT user_id, CONCAT('New event from user ', ?, ' in group ', ?) as message, 0, NOW() FROM group_memberships WHERE group_id = ? AND user_id != ?`;
-            db.query(notificationQuery, [creatorName, groupName, group_id, created_by], (err2) => {
-              if (err2) {
-                console.error('Failed to notify group members:', err2);
+      const group = groups[0];
+      const isCreator = Number(group.creator_id) === Number(created_by);
+      const memberRows = await queryAsync(
+        "SELECT user_id FROM group_memberships WHERE group_id = ? AND user_id = ? AND status = 'joined'",
+        [normalizedGroupId, created_by]
+      );
+      const isJoinedMember = memberRows.length > 0;
+      if (!isCreator && !isJoinedMember) {
+        return res.status(403).send({ message: 'Musisz nalezec do grupy, aby dodawac posty.' });
+      }
+      if ((group.post_permission_mode || 'all_members') === 'selected_members' && !isCreator) {
+        const allowedRows = await queryAsync(
+          'SELECT user_id FROM group_post_permissions WHERE group_id = ? AND user_id = ?',
+          [normalizedGroupId, created_by]
+        );
+        if (!allowedRows.length) {
+          return res.status(403).send({ message: 'Tworca grupy ograniczyl mozliwosc dodawania postow.' });
+        }
+      }
+    }
+
+    db.getConnection((connectionError, connection) => {
+      if (connectionError) {
+        return res.status(500).send({ message: 'Failed to create event.', error: connectionError });
+      }
+
+      connection.beginTransaction((transactionError) => {
+        if (transactionError) {
+          connection.release();
+          return res.status(500).send({ message: 'Failed to create event.', error: transactionError });
+        }
+
+        let remainingBalance = null;
+
+        const continueAfterBalance = () => {
+          const query = `
+            INSERT INTO events (
+              title, description, date, location, capacity, created_by, image, group_id, promotion_days, promotion_cost, promoted_until, latitude, longitude
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `;
+          connection.query(
+            query,
+            [title, description, date, location, capacity, created_by, image, normalizedGroupId, selectedPromotionDays, promotionCost, promotedUntil, normalizedLatitude, normalizedLongitude],
+            (err, result) => {
+              if (err) {
+                return connection.rollback(() => {
+                  connection.release();
+                  res.status(500).send({ message: 'Failed to create event.', error: err });
+                });
               }
-            });
-          } else {
-            console.error('Failed to fetch creator or group name:', err3);
-          }
-        });
-      }
-      res.status(201).send({ message: 'Event created successfully!' });
+
+              connection.commit((commitErr) => {
+                connection.release();
+                if (commitErr) {
+                  return res.status(500).send({ message: 'Failed to finalize event creation.', error: commitErr });
+                }
+
+                if (normalizedGroupId) {
+                  const getNamesQuery = `SELECT u.username AS creator_name, g.name AS group_name FROM users u, groups g WHERE u.id = ? AND g.id = ?`;
+                  db.query(getNamesQuery, [created_by, normalizedGroupId], (err3, results) => {
+                    if (!err3 && results && results[0]) {
+                      const creatorName = results[0].creator_name;
+                      const groupName = results[0].group_name;
+                      const notificationQuery = `INSERT INTO notifications (user_id, message, seen, created_at) SELECT user_id, CONCAT('New event from user ', ?, ' in group ', ?) as message, 0, NOW() FROM group_memberships WHERE group_id = ? AND user_id != ?`;
+                      db.query(notificationQuery, [creatorName, groupName, normalizedGroupId, created_by], (err2) => {
+                        if (err2) {
+                          console.error('Failed to notify group members:', err2);
+                        }
+                      });
+                    } else {
+                      console.error('Failed to fetch creator or group name:', err3);
+                    }
+                  });
+                }
+
+                res.status(201).send({
+                  message: 'Event created successfully!',
+                  chargedAmount: promotionCost,
+                  remainingBalance,
+                });
+              });
+            }
+          );
+        };
+
+        if (promotionCost > 0) {
+          connection.query(
+            'UPDATE users SET balance = balance - ? WHERE id = ? AND balance >= ?',
+            [promotionCost, created_by, promotionCost],
+            (balanceErr, balanceResult) => {
+              if (balanceErr) {
+                return connection.rollback(() => {
+                  connection.release();
+                  res.status(500).send({ message: 'Failed to process promotion.', error: balanceErr });
+                });
+              }
+
+              if (!balanceResult || balanceResult.affectedRows === 0) {
+                return connection.rollback(() => {
+                  connection.release();
+                  res.status(400).send({ message: 'Brak srodkow w balansie na promowanie wydarzenia.' });
+                });
+              }
+              connection.query(
+                'SELECT balance FROM users WHERE id = ?',
+                [created_by],
+                (balanceReadErr, balanceRows) => {
+                  if (balanceReadErr) {
+                    return connection.rollback(() => {
+                      connection.release();
+                      res.status(500).send({ message: 'Failed to process promotion.', error: balanceReadErr });
+                    });
+                  }
+                  remainingBalance = Number(balanceRows?.[0]?.balance ?? 0);
+                  continueAfterBalance();
+                }
+              );
+            }
+          );
+          return;
+        }
+
+        continueAfterBalance();
+      });
     });
   } catch (err) {
     res.status(500).send({ message: 'Internal server error', error: err });
   }
+  };
+
+  createEventAsync();
 };
 
 const getAllEvents = (req, res) => {
+  const userId = req.user.id;
   const { created_by } = req.query;
   let query = `
-    SELECT events.*, users.username AS created_by_username
+    SELECT events.*, users.username AS created_by_username,
+      CASE
+        WHEN events.promoted_until IS NOT NULL AND events.promoted_until > NOW() THEN 1
+        ELSE 0
+      END AS is_promoted_active
     FROM events
     LEFT JOIN users ON events.created_by = users.id
+    INNER JOIN group_memberships gm ON gm.group_id = events.group_id
+      AND gm.user_id = ?
+      AND gm.status = 'joined'
   `;
+  const queryParams = [userId];
 
   if (created_by) {
-    query += ` WHERE events.created_by = ${db.escape(created_by)}`;
+    query += ' WHERE events.created_by = ?';
+    queryParams.push(created_by);
   }
 
-  db.query(query, (err, results) => {
+  query += `
+    ORDER BY
+      CASE
+        WHEN events.promoted_until IS NOT NULL AND events.promoted_until > NOW() THEN 1
+        ELSE 0
+      END DESC,
+      events.promoted_until DESC,
+      events.date DESC
+  `;
+
+  db.query(query, queryParams, (err, results) => {
     if (err) {
       console.error('Error fetching events:', err);
       return res.status(500).send({ message: 'Database error', error: err });
@@ -72,16 +280,20 @@ const getAllEvents = (req, res) => {
   });
 };
 const getEventById = (req, res) => {
+  const userId = req.user.id;
   const eventId = req.params.id;
 
   const query = `
     SELECT events.*, users.username AS created_by_username
     FROM events
     LEFT JOIN users ON events.created_by = users.id
+    INNER JOIN group_memberships gm ON gm.group_id = events.group_id
+      AND gm.user_id = ?
+      AND gm.status = 'joined'
     WHERE events.id = ?
   `;
 
-  db.query(query, [eventId], (err, results) => {
+  db.query(query, [userId, eventId], (err, results) => {
     if (err) {
       console.error('Error fetching event details:', err);
       return res.status(500).send({ message: 'Database error', error: err });

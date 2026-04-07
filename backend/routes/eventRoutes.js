@@ -5,9 +5,9 @@ const { verifyToken } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 router.post('/', verifyToken, upload.single('image'), createEvent);
-router.get('/', getAllEvents);
+router.get('/', verifyToken, getAllEvents);
 router.get('/admin/all', verifyToken, getEventsWithCommentsForAdmin);
-router.get('/:id', getEventById); 
+router.get('/:id', verifyToken, getEventById); 
 router.get('/:id/comments', getComments);
 router.post('/:id/comments', verifyToken, addComment);
 router.post('/:id/favorite', verifyToken, markFavorite);

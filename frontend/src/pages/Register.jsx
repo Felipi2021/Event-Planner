@@ -25,16 +25,16 @@ const Register = () => {
 
     const errors = [];
     if (value.length < 8) {
-      errors.push('Password must be at least 8 characters long.');
+      errors.push('Haslo musi miec co najmniej 8 znakow.');
     }
     if (!/[A-Z]/.test(value)) {
-      errors.push('Password must contain at least 1 uppercase letter.');
+      errors.push('Haslo musi zawierac co najmniej 1 duza litere.');
     }
     if (!/\d/.test(value)) {
-      errors.push('Password must contain at least 1 number.');
+      errors.push('Haslo musi zawierac co najmniej 1 cyfre.');
     }
     if (!/[@$!%*#^?&]/.test(value)) {
-      errors.push('Password must contain at least 1 special character.');
+      errors.push('Haslo musi zawierac co najmniej 1 znak specjalny.');
     }
 
     if (errors.length === 0) {
@@ -55,7 +55,7 @@ const Register = () => {
       setEmailMessage('');
     } else {
       setEmailValid(false);
-      setEmailMessage('Invalid email format');
+      setEmailMessage('Nieprawidlowy format e-mail');
     }
   };
 
@@ -66,12 +66,12 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (passwordErrors.length > 0 || !emailValid) {
-      toast.error('Please fix the errors before submitting.');
+      toast.error('Popraw bledy przed wyslaniem formularza.');
       return;
     }
 
     if (!image) {
-      toast.error('Profile image is required.');
+      toast.error('Zdjecie profilowe jest wymagane.');
       return;
     }
 
@@ -87,24 +87,24 @@ const Register = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      toast.success('Registered successfully!');
+      toast.success('Rejestracja zakonczona pomyslnie!');
       navigate('/login');
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setServerError(err.response.data.message);
         toast.error(err.response.data.message);
       } else {
-        setServerError('Registration failed. Please try again.');
-        toast.error('Registration failed. Please try again.');
+        setServerError('Rejestracja nie powiodla sie. Sprobuj ponownie.');
+        toast.error('Rejestracja nie powiodla sie. Sprobuj ponownie.');
       }
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="form-page">
-      <h2>Register</h2>
+      <h2>Rejestracja</h2>
       <div className="form__group">
-        <label htmlFor="username">Username:</label>
+        <label htmlFor="username">Nazwa uzytkownika:</label>
         <input
           id="username"
           type="text"
@@ -126,7 +126,7 @@ const Register = () => {
         {!emailValid && <p className="error-message">{emailMessage}</p>}
       </div>
       <div className="form__group">
-        <label htmlFor="password">Password:</label>
+        <label htmlFor="password">Haslo:</label>
         <input
           id="password"
           type="password"
@@ -141,12 +141,12 @@ const Register = () => {
               <p key={index} className="error-message">{error}</p>
             ))
           ) : (
-            <p className="success-message">Password is valid ✓</p>
+            <p className="success-message">Haslo jest poprawne ✓</p>
           )
         )}
       </div>
       <div className="form__group">
-        <label htmlFor="profileImage">Profile Image:</label>
+        <label htmlFor="profileImage">Zdjecie profilowe:</label>
         <input
           id="profileImage"
           type="file"
@@ -156,12 +156,12 @@ const Register = () => {
       </div>
       {serverError && <p className="error-message">{serverError}</p>}
       <p style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        Already have an account?{' '}
+        Masz juz konto?{' '}
         <Link to="/login" style={{ color: '#007bff', textDecoration: 'underline' }}>
-          Login
+          Zaloguj sie
         </Link>
       </p>
-      <button type="submit">Register</button>
+      <button type="submit">Zarejestruj sie</button>
     </form>
   );
 };

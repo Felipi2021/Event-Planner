@@ -1,5 +1,34 @@
 const groupModel = require('../models/groupmodel');
 const groupMembership = require('../models/groupmembership');
+const db = require('../models/db');
+let groupPostingSchemaEnsured = false;
+
+const queryAsync = (query, params = []) =>
+  new Promise((resolve, reject) => {
+    db.query(query, params, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+
+const ensureGroupPostingSchema = async () => {
+  if (groupPostingSchemaEnsured) return;
+
+  const modeColumnExists = await queryAsync("SHOW COLUMNS FROM groups LIKE 'post_permission_mode'");
+  if (!Array.isArray(modeColumnExists) || modeColumnExists.length === 0) {
+    await queryAsync("ALTER TABLE groups ADD COLUMN post_permission_mode VARCHAR(32) NOT NULL DEFAULT 'all_members'");
+  }
+
+  await queryAsync(`
+    CREATE TABLE IF NOT EXISTS group_post_permissions (
+      group_id INT NOT NULL,
+      user_id INT NOT NULL,
+      PRIMARY KEY (group_id, user_id)
+    )
+  `);
+
+  groupPostingSchemaEnsured = true;
+};
 
 // Create a new group
 const createGroup = (req, res) => {
@@ -150,6 +179,81 @@ const markNotificationsSeen = (req, res) => {
   });
 };
 
+const getGroupPostPermissions = async (req, res) => {
+  try {
+    await ensureGroupPostingSchema();
+    const creator_id = req.user.id;
+    const { groupId } = req.params;
+    const groups = await queryAsync('SELECT id, creator_id, post_permission_mode FROM groups WHERE id = ?', [groupId]);
+    if (!groups.length) return res.status(404).json({ error: 'Group not found' });
+    const group = groups[0];
+    if (group.creator_id !== creator_id) return res.status(403).json({ error: 'Not authorized' });
+
+    const members = await queryAsync(
+      `SELECT u.id, u.username, u.image
+       FROM users u
+       JOIN group_memberships gm ON gm.user_id = u.id
+       WHERE gm.group_id = ? AND gm.status = 'joined'
+       ORDER BY u.username ASC`,
+      [groupId]
+    );
+    const allowedRows = await queryAsync('SELECT user_id FROM group_post_permissions WHERE group_id = ?', [groupId]);
+
+    res.json({
+      mode: group.post_permission_mode || 'all_members',
+      members,
+      allowedUserIds: allowedRows.map((row) => row.user_id),
+    });
+  } catch (error) {
+    console.error('Failed to get group post permissions:', error);
+    res.status(500).json({ error: 'Failed to get post permissions' });
+  }
+};
+
+const updateGroupPostPermissions = async (req, res) => {
+  try {
+    await ensureGroupPostingSchema();
+    const creator_id = req.user.id;
+    const { groupId } = req.params;
+    const { mode, allowedUserIds } = req.body;
+
+    if (!['all_members', 'selected_members'].includes(mode)) {
+      return res.status(400).json({ error: 'Invalid mode' });
+    }
+
+    const groups = await queryAsync('SELECT id, creator_id FROM groups WHERE id = ?', [groupId]);
+    if (!groups.length) return res.status(404).json({ error: 'Group not found' });
+    if (groups[0].creator_id !== creator_id) return res.status(403).json({ error: 'Not authorized' });
+
+    const normalizedAllowed = Array.isArray(allowedUserIds)
+      ? [...new Set(allowedUserIds.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))]
+      : [];
+
+    if (mode === 'selected_members') {
+      const joinedRows = await queryAsync(
+        "SELECT user_id FROM group_memberships WHERE group_id = ? AND status = 'joined'",
+        [groupId]
+      );
+      const joinedSet = new Set(joinedRows.map((row) => row.user_id));
+      const invalid = normalizedAllowed.some((id) => !joinedSet.has(id));
+      if (invalid) return res.status(400).json({ error: 'Allowed users must be joined members' });
+    }
+
+    await queryAsync('UPDATE groups SET post_permission_mode = ? WHERE id = ?', [mode, groupId]);
+    await queryAsync('DELETE FROM group_post_permissions WHERE group_id = ?', [groupId]);
+
+    if (mode === 'selected_members' && normalizedAllowed.length > 0) {
+      const values = normalizedAllowed.map((userId) => [Number(groupId), userId]);
+      await queryAsync('INSERT INTO group_post_permissions (group_id, user_id) VALUES ?', [values]);
+    }
+
+    res.json({ message: 'Post permissions updated' });
+  } catch (error) {
+    console.error('Failed to update group post permissions:', error);
+    res.status(500).json({ error: 'Failed to update post permissions' });
+  }
+};
+
 module.exports = {
   createGroup,
   searchGroups,
@@ -161,5 +265,7 @@ module.exports = {
   leaveGroup,
   getManagedGroups,
   getUserNotifications,
-  markNotificationsSeen
+  markNotificationsSeen,
+  getGroupPostPermissions,
+  updateGroupPostPermissions
 }; 

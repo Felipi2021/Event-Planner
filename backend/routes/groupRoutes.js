@@ -27,6 +27,10 @@ router.post('/handle-request', auth.verifyToken, groupController.handleRequest);
 router.get('/my-groups', auth.verifyToken, groupController.getUserGroups);
 // Get pending requests for a group (creator only)
 router.get('/:groupId/pending', auth.verifyToken, groupController.getPendingRequests);
+// Get current post permissions and members for a group (creator only)
+router.get('/:groupId/post-permissions', auth.verifyToken, groupController.getGroupPostPermissions);
+// Update who can post in a group (creator only)
+router.put('/:groupId/post-permissions', auth.verifyToken, groupController.updateGroupPostPermissions);
 // Get all groups (browse)
 router.get('/all', auth.verifyToken, groupController.getAllGroups);
 // Leave a group

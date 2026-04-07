@@ -23,6 +23,113 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+let userBalanceSchemaEnsured = false;
+
+const ensureUserBalanceSchema = async () => {
+  if (userBalanceSchemaEnsured) return;
+
+  const hasBalanceColumn = await new Promise((resolve, reject) => {
+    db.query("SHOW COLUMNS FROM users LIKE 'balance'", (err, results) => {
+      if (err) return reject(err);
+      resolve(Array.isArray(results) && results.length > 0);
+    });
+  });
+
+  if (!hasBalanceColumn) {
+    await new Promise((resolve, reject) => {
+      db.query('ALTER TABLE users ADD COLUMN balance DECIMAL(10,2) NOT NULL DEFAULT 0', (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  }
+
+  const hasStoryColumn = await new Promise((resolve, reject) => {
+    db.query("SHOW COLUMNS FROM users LIKE 'story_video'", (err, results) => {
+      if (err) return reject(err);
+      resolve(Array.isArray(results) && results.length > 0);
+    });
+  });
+
+  if (!hasStoryColumn) {
+    await new Promise((resolve, reject) => {
+      db.query('ALTER TABLE users ADD COLUMN story_video VARCHAR(255) NULL', (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  }
+
+  await new Promise((resolve, reject) => {
+    db.query(
+      `CREATE TABLE IF NOT EXISTS user_stories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        video_filename VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
+      (err) => {
+        if (err) return reject(err);
+        resolve();
+      }
+    );
+  });
+
+  const storyIdColumn = await new Promise((resolve, reject) => {
+    db.query("SHOW COLUMNS FROM user_stories LIKE 'id'", (err, results) => {
+      if (err) return reject(err);
+      resolve(Array.isArray(results) ? results[0] : null);
+    });
+  });
+
+  const storyPrimaryKey = await new Promise((resolve, reject) => {
+    db.query("SHOW INDEX FROM user_stories WHERE Key_name = 'PRIMARY'", (err, results) => {
+      if (err) return reject(err);
+      resolve(Array.isArray(results) && results.length > 0);
+    });
+  });
+
+  const needsRebuild = !storyIdColumn || !(storyIdColumn.Extra || '').includes('auto_increment') || !storyPrimaryKey;
+
+  if (needsRebuild) {
+    try {
+      if (!storyPrimaryKey) {
+        await new Promise((resolve, reject) => {
+          db.query('ALTER TABLE user_stories ADD PRIMARY KEY (id)', (err) => (err ? reject(err) : resolve()));
+        });
+      }
+      if (!storyIdColumn || !(storyIdColumn.Extra || '').includes('auto_increment')) {
+        await new Promise((resolve, reject) => {
+          db.query('ALTER TABLE user_stories MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT', (err) => (err ? reject(err) : resolve()));
+        });
+      }
+    } catch (alterErr) {
+      console.error('Direct user_stories ALTER failed, rebuilding table:', alterErr);
+      await new Promise((resolve, reject) => {
+        db.query(
+          `CREATE TABLE IF NOT EXISTS user_stories_fixed (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            video_filename VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )`,
+          (err) => (err ? reject(err) : resolve())
+        );
+      });
+      await new Promise((resolve, reject) => {
+        db.query(
+          `INSERT INTO user_stories_fixed (user_id, video_filename, created_at)
+           SELECT user_id, video_filename, COALESCE(created_at, NOW()) FROM user_stories`,
+          (err) => (err ? reject(err) : resolve())
+        );
+      });
+      await new Promise((resolve, reject) => db.query('DROP TABLE user_stories', (err) => (err ? reject(err) : resolve())));
+      await new Promise((resolve, reject) => db.query('RENAME TABLE user_stories_fixed TO user_stories', (err) => (err ? reject(err) : resolve())));
+    }
+  }
+
+  userBalanceSchemaEnsured = true;
+};
 
 const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -178,13 +285,117 @@ const getAverageRating = (req, res) => {
 
 const getUserDetails = (req, res) => {
   const userId = req.params.userId;
-  const query = 'SELECT username, email, image, created_at, description FROM users WHERE id = ?';
-  db.query(query, [userId], (err, results) => {
-    if (err || results.length === 0) {
-      return res.status(404).send({ message: 'User not found!' });
-    }
-    res.send(results[0]); 
-  });
+  ensureUserBalanceSchema()
+    .then(() => {
+      const query = 'SELECT username, email, image, created_at, description, balance, story_video FROM users WHERE id = ?';
+      db.query(query, [userId], (err, results) => {
+        if (err || results.length === 0) {
+          return res.status(404).send({ message: 'User not found!' });
+        }
+        res.send(results[0]);
+      });
+    })
+    .catch((error) => {
+      console.error('Error ensuring user balance schema:', error);
+      res.status(500).send({ message: 'Database error', error });
+    });
+};
+
+const uploadStory = async (req, res) => {
+  const userId = Number(req.params.userId);
+  const requesterId = Number(req.user?.id);
+  if (!requesterId || requesterId !== userId) {
+    return res.status(403).send({ message: 'Brak uprawnien do dodania story na tym koncie.' });
+  }
+
+  if (!req.file) {
+    return res.status(400).send({ message: 'Brak pliku story.' });
+  }
+
+  try {
+    await ensureUserBalanceSchema();
+    db.query('INSERT INTO user_stories (user_id, video_filename) VALUES (?, ?)', [userId, req.file.filename], (insertErr) => {
+      if (insertErr) {
+        console.error('Story queue insert failed, fallback to legacy story_video:', insertErr);
+      }
+      db.query('UPDATE users SET story_video = ? WHERE id = ?', [req.file.filename, userId], (err, result) => {
+        if (err) {
+          return res.status(500).send({ message: 'Database error', error: err });
+        }
+        if (!result || result.affectedRows === 0) {
+          return res.status(404).send({ message: 'User not found!' });
+        }
+        return res.send({
+          message: 'Story zapisane.',
+          storyVideo: req.file.filename,
+          queued: !insertErr,
+        });
+      });
+    });
+  } catch (error) {
+    return res.status(500).send({ message: 'Database error', error });
+  }
+};
+
+const getUserStories = async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!userId) {
+    return res.status(400).send({ message: 'Invalid user id.' });
+  }
+
+  try {
+    await ensureUserBalanceSchema();
+    db.query(
+      `SELECT id, video_filename, created_at
+       FROM user_stories
+       WHERE user_id = ?
+         AND created_at >= (NOW() - INTERVAL 24 HOUR)
+       ORDER BY created_at ASC`,
+      [userId],
+      (err, rows) => {
+        if (err) {
+          return res.status(500).send({ message: 'Database error', error: err });
+        }
+        return res.send(Array.isArray(rows) ? rows : []);
+      }
+    );
+  } catch (error) {
+    return res.status(500).send({ message: 'Database error', error });
+  }
+};
+
+const topUpBalance = async (req, res) => {
+  const userId = Number(req.params.userId);
+  const requesterId = Number(req.user?.id);
+  const amount = Number(req.body?.amount || 0);
+
+  if (!requesterId || requesterId !== userId) {
+    return res.status(403).send({ message: 'Brak uprawnien do doladowania tego konta.' });
+  }
+
+  if (!amount || amount <= 0) {
+    return res.status(400).send({ message: 'Nieprawidlowa kwota doladowania.' });
+  }
+
+  try {
+    await ensureUserBalanceSchema();
+    db.query('UPDATE users SET balance = balance + ? WHERE id = ?', [amount, userId], (err, result) => {
+      if (err) {
+        return res.status(500).send({ message: 'Database error', error: err });
+      }
+      if (!result || result.affectedRows === 0) {
+        return res.status(404).send({ message: 'User not found!' });
+      }
+      db.query('SELECT balance FROM users WHERE id = ?', [userId], (readErr, rows) => {
+        if (readErr) {
+          return res.status(500).send({ message: 'Database error', error: readErr });
+        }
+        return res.send({ message: 'Balans doladowany.', balance: Number(rows?.[0]?.balance || 0) });
+      });
+    });
+  } catch (error) {
+    return res.status(500).send({ message: 'Database error', error });
+  }
 };
 const getFavorites = (req, res) => {
   const userId = req.params.userId;
@@ -308,4 +519,4 @@ const createAdmin = async (req, res) => {
   }
 };
 
-module.exports = { getCommentCount, addRating, getAverageRating, updateDescription, register: [upload.single('image'), register], getFavorites, login, getUserDetails, getAttendanceStatus, banUser, unbanUser, getAllUsers, createAdmin };
+module.exports = { getCommentCount, addRating, getAverageRating, updateDescription, register: [upload.single('image'), register], uploadStory: [upload.single('story'), uploadStory], getUserStories, getFavorites, login, getUserDetails, topUpBalance, getAttendanceStatus, banUser, unbanUser, getAllUsers, createAdmin };
